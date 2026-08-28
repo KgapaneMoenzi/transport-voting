@@ -36,6 +36,20 @@ CREATE TABLE IF NOT EXISTS change_requests (
   status         TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected'))
 );
 
+-- A durable record of who voted for what, snapshotted each night before the
+-- daily reset clears the active "votes" table. Admin can review this for the
+-- current 7-day cycle; it's fully wiped and restarted weekly (Monday 00:05
+-- SAST) — see resetJob.js.
+CREATE TABLE IF NOT EXISTS vote_history (
+  id          SERIAL PRIMARY KEY,
+  student_id  TEXT NOT NULL,
+  username    TEXT NOT NULL,
+  direction   TEXT NOT NULL CHECK (direction IN ('to_campus', 'to_residence')),
+  slot_time   TEXT NOT NULL,
+  voted_ts    BIGINT NOT NULL,
+  archived_at BIGINT NOT NULL
+);
+
 -- Seed the default slots only if the table is empty
 INSERT INTO slots (id, direction, time, capacity)
 SELECT * FROM (VALUES

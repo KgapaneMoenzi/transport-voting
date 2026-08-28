@@ -4,17 +4,28 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// "To Campus" can only be booked or switched between 19:00 and 00:00 (South
-// Africa time). "To Residence" has no time restriction — capacity is the
-// only limit there. Removing a booking is never time-restricted.
-function isCampusBookingWindowOpen() {
+// Slots represent a specific departure time today (e.g. "06:55"). A slot
+// can only be booked or switched to while its time is still ahead of the
+// current South Africa time — once that time has passed for the day, the
+// slot is off the board for new bookings (but never blocks removing an
+// existing one). This applies to both directions equally.
+function nowMinutesSAST() {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Africa/Johannesburg',
     hour: '2-digit',
+    minute: '2-digit',
     hour12: false,
   }).formatToParts(new Date());
   const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
-  return hour >= 19 && hour <= 23;
+  const minute = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return hour * 60 + minute;
+}
+function slotMinutes(timeStr) {
+  const [h, m] = String(timeStr).split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+function hasSlotTimePassed(timeStr) {
+  return slotMinutes(timeStr) <= nowMinutesSAST();
 }
 
 // The current student's bookings (one per direction, if any).
@@ -68,10 +79,6 @@ router.post('/', requireAuth, async (req, res) => {
   }
   if (!slotId) return res.status(400).json({ error: 'slotId is required' });
 
-  if (direction === 'to_campus' && !isCampusBookingWindowOpen()) {
-    return res.status(403).json({ error: 'To Campus booking is only open from 7pm to midnight. You can still remove an existing booking.' });
-  }
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -82,6 +89,10 @@ router.post('/', requireAuth, async (req, res) => {
     if (slot.direction !== direction) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Slot does not match direction' });
+    }
+    if (hasSlotTimePassed(slot.time)) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: `The ${slot.time} slot has already passed for today — pick a later slot.` });
     }
 
     const existing = await client.query(
@@ -123,9 +134,9 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
-// A student removes their own booking for a direction. Always allowed —
-// never time-restricted, even outside the To Campus booking window —
-// so someone who needs to drop out can always do so.
+// A student removes their own booking for a direction. Always allowed,
+// regardless of whether the slot's time has passed — so someone who needs
+// to drop out can always do so.
 router.delete('/mine/:direction', requireAuth, async (req, res) => {
   if (req.user.role !== 'student') return res.status(403).json({ error: 'Students only' });
   const { direction } = req.params;

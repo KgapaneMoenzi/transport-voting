@@ -73,6 +73,7 @@
   .btn-primary{ background:var(--amber); color:#1a1206; }
   .btn-primary:disabled{ background:#3a3226; color:#6b6152; cursor:not-allowed; }
   .btn-ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
+  .btn-outline-red{ background:transparent; color:var(--red); border:1px solid var(--red-dim); }
   .gate-note{ margin-top:22px; padding:12px 14px; border-radius:6px; background:var(--panel); border:1px dashed var(--line); font-size:12px; color:var(--text-dim); line-height:1.5; }
   .tabs{ display:flex; gap:8px; margin-bottom:18px; }
   .tab{ flex:1; padding:10px 8px; text-align:center; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--text-dim); font-size:12px; font-weight:600; cursor:pointer; font-family:var(--mono); letter-spacing:1px; text-transform:uppercase; transition:transform .1s, background .15s; }
@@ -98,6 +99,7 @@
   .riders-empty{ color:var(--text-dimmer); font-size:11.5px; font-family:var(--mono); padding:6px 0; }
   .slot-row:active{ background:var(--panel-2); transform:scale(.985); }
   .slot-row.full{ cursor:not-allowed; opacity:0.5; }
+  .slot-row.passed{ cursor:not-allowed; opacity:0.4; }
   .slot-row.mine{ background:var(--green-wash); }
   .slot-meta{ font-size:11.5px; color:var(--text-dim); font-family:var(--mono); }
   .slot-status{ text-align:right; }
@@ -127,6 +129,8 @@
   .locked-banner .banner-icon{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.5px; border:1px solid currentColor; border-radius:4px; padding:2px 5px; flex-shrink:0; margin-top:1px; }
   .locked-banner .banner-body{ flex:1; color:var(--text); }
   .locked-banner .banner-body b{ color:inherit; }
+  .banner-actions{ display:flex; gap:8px; margin-top:10px; }
+  .banner-actions .btn{ margin-top:0; padding:9px 12px; font-size:12px; }
   .section-title{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin:22px 0 10px; }
   .empty{ color:var(--text-dim); font-size:13px; padding:24px 4px; text-align:center; font-family:var(--mono); }
   .overlay{ position:fixed; inset:0; background:rgba(6,7,4,0.78); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
@@ -187,6 +191,11 @@ const DIRECTIONS = [
 const DEFAULT_CAPACITY = 13;
 const CHANGE_WINDOW_MS = 10 * 60 * 1000;
 const STUDENT_ID_LENGTH = 9;
+// Slots are specific departure times today. Once a slot's time has gone
+// by, it can no longer be booked or switched to — mirrors the server's
+// own check, purely so the UI can show "Passed" immediately rather than
+// waiting for a rejected request. The server is the real enforcement.
+const SLOT_TIMEZONE = 'Africa/Johannesburg';
 
 let studentToken = null, studentId = '', currentUsername = '';
 let adminToken = null;
@@ -198,10 +207,12 @@ let slots = [];
 let myVotes = [];
 let myChangeRequests = [];
 let adminChangeRequests = [];
+let voteHistory = [];
 let ridersCache = {};
 let countdownTimer = null;
 let pollTimer = null;
 let syncTickTimer = null;
+let clockTickTimer = null;
 let lastSyncedAt = Date.now();
 let lastSnapshot = null;
 let expandedBoardSlots = new Set();
@@ -231,9 +242,10 @@ async function refreshMyChangeRequests(){
   myChangeRequests = await api('/change-requests/mine');
 }
 async function refreshAdminChangeRequests(){ adminChangeRequests = await api('/change-requests'); }
+async function refreshVoteHistory(){ voteHistory = await api('/history'); }
 async function refreshRiders(slotId){ ridersCache[slotId] = await api(`/votes/slot/${slotId}`); return ridersCache[slotId]; }
 async function loadBoardData(){ await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]); }
-async function loadAdminData(){ await Promise.all([refreshSlots(), refreshAdminChangeRequests()]); }
+async function loadAdminData(){ await Promise.all([refreshSlots(), refreshAdminChangeRequests(), refreshVoteHistory()]); }
 
 function isEditable(vote){ return (Date.now() - vote.originalTs) < CHANGE_WINDOW_MS; }
 function msRemaining(vote){ return Math.max(0, CHANGE_WINDOW_MS - (Date.now() - vote.originalTs)); }
@@ -244,6 +256,24 @@ function fmtRemaining(ms){
   return `${mm}:${ss.toString().padStart(2,'0')}`;
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Minutes since midnight, in Africa/Johannesburg, regardless of the
+// device's own timezone/locale settings.
+function nowMinutesSAST(){
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: SLOT_TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
+  const minute = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return hour * 60 + minute;
+}
+function slotMinutes(timeStr){
+  const [h, m] = String(timeStr).split(':').map(Number);
+  return (h||0) * 60 + (m||0);
+}
+function hasSlotPassed(timeStr){
+  return slotMinutes(timeStr) <= nowMinutesSAST();
+}
 
 function sanitizeStudentIdInput(inputEl){
   const digitsOnly = inputEl.value.replace(/\D/g, '').slice(0, STUDENT_ID_LENGTH);
@@ -259,6 +289,16 @@ function startCountdownIfNeeded(){
   }
 }
 function clearCountdown(){ if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; } }
+
+function startClockTickIfNeeded(){
+  clearClockTick();
+  if(view==='board'){
+    // Re-render once a minute so slots automatically flip to "Passed"
+    // as the clock ticks past their time, without needing a refresh.
+    clockTickTimer = setInterval(()=>{ render(false); }, 60000);
+  }
+}
+function clearClockTick(){ if(clockTickTimer){ clearInterval(clockTickTimer); clockTickTimer=null; } }
 
 function snapshotTaken(){
   const m = {};
@@ -321,8 +361,8 @@ function flapMarkup(str, animate){
 function render(animate, changedIds){
   if(animate===undefined) animate = true;
   const app = document.getElementById('app');
-  if(view==='gate'){ stopPolling(); app.innerHTML = renderGate(); bindGate(); return; }
-  if(view==='admin'){ stopPolling(); app.innerHTML = renderAdmin(); bindAdmin(); return; }
+  if(view==='gate'){ stopPolling(); clearClockTick(); app.innerHTML = renderGate(); bindGate(); return; }
+  if(view==='admin'){ stopPolling(); clearClockTick(); app.innerHTML = renderAdmin(); bindAdmin(); return; }
   app.innerHTML = renderBoard(animate, changedIds || new Set()); bindBoard();
 }
 
@@ -462,6 +502,7 @@ function renderBoard(animate, changedIds){
   } else {
     rows = dirSlots.map(slot=>{
       const st = statusFor(slot);
+      const passed = hasSlotPassed(slot.time) && !st.mine;
       let statusHtml, rowClass='';
       if(st.mine){
         statusHtml = editable ? `<span class="tag tag-mine">Yours</span>` : `<span class="tag tag-mine">Locked</span>`;
@@ -469,12 +510,15 @@ function renderBoard(animate, changedIds){
       } else if(st.full){
         statusHtml = `<span class="tag tag-full">Full</span>`;
         rowClass = 'full';
+      } else if(passed){
+        statusHtml = `<span class="tag tag-dim">Passed</span>`;
+        rowClass = 'passed';
       } else if(st.remaining<=3){
         statusHtml = `<span class="tag tag-low">${st.remaining} left</span>`;
       } else {
         statusHtml = `<span class="tag tag-open">Open</span>`;
       }
-      const clickable = !st.mine && !st.full;
+      const clickable = !st.mine && !st.full && !passed;
       const pct = slot.capacity ? Math.min(100, Math.round((st.taken/slot.capacity)*100)) : 0;
       const barClass = st.full ? 'full' : (st.remaining<=3 ? 'low' : '');
       const flashClass = (!animate && changedIds.has(slot.id)) ? ' row-flash' : '';
@@ -505,13 +549,17 @@ function renderBoard(animate, changedIds){
   let lockedBanner = '';
   const myPendingReq = myChangeRequests.find(r=>r.direction===activeDirection && r.status==='pending');
   const lastReq = myChangeRequests.filter(r=>r.direction===activeDirection).sort((a,b)=>b.ts-a.ts)[0];
+  const removeBtnHtml = `<button class="btn btn-outline-red" data-remove-booking style="padding:9px 12px; font-size:12px;">Remove my booking</button>`;
 
   if(myVote && myPendingReq){
     const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
     lockedBanner = `
       <div class="locked-banner blue">
         <div class="banner-icon">Sent</div>
-        <div class="banner-body">You're booked for <b>${bookedTime}</b>. Your change request (with proof) has been sent to admin and is awaiting review.</div>
+        <div class="banner-body">
+          You're booked for <b>${bookedTime}</b>. Your change request (with proof) has been sent to admin and is awaiting review.
+          <div class="banner-actions">${removeBtnHtml}</div>
+        </div>
       </div>`;
   } else if(myVote && editable){
     const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
@@ -519,8 +567,11 @@ function renderBoard(animate, changedIds){
       <div class="locked-banner amber">
         <div class="banner-icon">${fmtRemaining(msRemaining(myVote))}</div>
         <div class="banner-body">
-          Booked <b>${bookedTime}</b>. Tap any open slot below to switch — you can do this any time, even after this timer runs out, as long as the slot isn't full.
-          <div style="margin-top:10px;"><button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Or leave without picking a new slot (needs proof)</button></div>
+          Booked <b>${bookedTime}</b>. Tap any open slot below to switch — you can do this any time, even after this timer runs out, as long as the new slot's time hasn't passed and it isn't full.
+          <div class="banner-actions">
+            <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Leave without picking a new slot (needs proof)</button>
+            ${removeBtnHtml}
+          </div>
         </div>
       </div>`;
   } else if(myVote && !editable){
@@ -529,9 +580,12 @@ function renderBoard(animate, changedIds){
       <div class="locked-banner">
         <div class="banner-icon">Booked</div>
         <div class="banner-body">
-          You're booked for <b>${bookedTime}</b> (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can switch to any open slot below at any time — we'll notify you if one opens up.
-          If every slot is full and you need to leave without picking a new one, request a change with proof instead.
-          <div style="margin-top:10px;"><button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Request a change (upload proof)</button></div>
+          You're booked for <b>${bookedTime}</b> (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can switch to any open slot below, as long as its time hasn't passed yet — we'll notify you if one opens up.
+          If every remaining slot is full and you need to leave without picking a new one, request a change with proof instead.
+          <div class="banner-actions">
+            <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Request a change (upload proof)</button>
+            ${removeBtnHtml}
+          </div>
         </div>
       </div>`;
   } else if(!myVote && lastReq && lastReq.status==='approved'){
@@ -546,7 +600,7 @@ function renderBoard(animate, changedIds){
     <header>
       <div class="board-id"><span class="live-dot"></span><span class="eyebrow">RSM Student Accommodation</span></div>
       <h1>Transport Board</h1>
-      <div class="sub">Pick a time slot. You can switch to any open slot any time.</div>
+      <div class="sub">Pick a time slot. Slots close once their time has passed for today.</div>
       <div class="sync-line"><span class="live-dot"></span><span id="syncTicker">Live · synced just now</span></div>
     </header>
     <main>
@@ -573,7 +627,7 @@ function renderBoard(animate, changedIds){
 
 function bindBoard(){
   document.getElementById('switchId').addEventListener('click', ()=>{
-    clearCountdown(); stopPolling();
+    clearCountdown(); clearClockTick(); stopPolling();
     studentToken = null; studentId = ''; currentUsername = ''; role = null; gateMode = 'login';
     myVotes = []; myChangeRequests = []; ridersCache = {};
     view='gate'; render();
@@ -599,7 +653,10 @@ function bindBoard(){
   document.getElementById('adminLink').addEventListener('click', openAdminGate);
   const reqBtn = document.getElementById('requestChangeBtn');
   if(reqBtn) reqBtn.addEventListener('click', openChangeRequestModal);
+  const removeBtn = document.querySelector('[data-remove-booking]');
+  if(removeBtn) removeBtn.addEventListener('click', confirmRemoveBooking);
   startCountdownIfNeeded();
+  startClockTickIfNeeded();
   startPollingIfNeeded();
 }
 
@@ -609,7 +666,7 @@ function openAdminGate(){
     try{
       const data = await api('/auth/admin-login', { method:'POST', body: JSON.stringify({ password: pw }) });
       adminToken = data.token; role = 'admin';
-      clearCountdown(); stopPolling();
+      clearCountdown(); clearClockTick(); stopPolling();
       await loadAdminData();
       view='admin'; render();
     }catch(err){
@@ -624,7 +681,7 @@ async function requestBooking(slotId){
   const isSwitch = !!existing;
   const title = isSwitch ? `Switch to the ${slot.time} slot?` : `Book the ${slot.time} slot?`;
   const body = isSwitch
-    ? `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch again any time, as long as the slot you want isn't full.`
+    ? `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch again any time, as long as the slot you want isn't full and its time hasn't passed.`
     : `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch to any other open slot any time — no need to wait.`;
 
   showModal(title, body, async ()=>{
@@ -633,6 +690,36 @@ async function requestBooking(slotId){
       await api('/votes', { method:'POST', body: JSON.stringify({ direction: activeDirection, slotId }) });
       await Promise.all([refreshSlots(), refreshMyVotes()]);
       showToast(`Booked: ${slot.time}`);
+    }catch(err){
+      showToast(err.message);
+    }
+    render();
+  });
+}
+
+function confirmRemoveBooking(){
+  const myVote = myVoteFor(activeDirection);
+  if(!myVote) return;
+  const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
+  const div = document.createElement('div');
+  div.className='overlay'; div.id='overlay';
+  div.innerHTML = `
+    <div class="modal">
+      <h3>Remove your booking?</h3>
+      <p>This frees up your seat on the <b>${escapeHtml(bookedTime)}</b> slot (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can always book another open slot later.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn btn-outline-red" id="confirmRemoveBtn" style="margin-top:0;">Remove booking</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('confirmRemoveBtn').addEventListener('click', async ()=>{
+    closeModal();
+    try{
+      await api(`/votes/mine/${activeDirection}`, { method:'DELETE' });
+      await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]);
+      showToast('Booking removed');
     }catch(err){
       showToast(err.message);
     }
@@ -709,6 +796,30 @@ function renderChangeRequestsSection(){
   return `<div class="section-title">Change Requests (${pending.length})</div>${rows}`;
 }
 
+function renderVoteHistorySection(){
+  if(voteHistory.length===0){
+    return `<div class="section-title">Voting History (this week)</div><div class="empty">No archived votes yet — this fills in each night at 7pm and resets every Monday.</div>`;
+  }
+  // Group by the calendar day (South Africa time) the vote was archived on.
+  const groups = {};
+  voteHistory.forEach(row=>{
+    const day = new Date(Number(row.archived_at)).toLocaleDateString('en-ZA', { timeZone:'Africa/Johannesburg', weekday:'short', day:'numeric', month:'short' });
+    (groups[day] = groups[day] || []).push(row);
+  });
+  const dayBlocks = Object.entries(groups).map(([day, rows])=>{
+    const dirLabelFor = d => DIRECTIONS.find(x=>x.id===d)?.label || d;
+    const items = rows.map(r=>
+      `<div class="riders-item"><span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span></span><span class="riders-meta">${dirLabelFor(r.direction)} · ${escapeHtml(r.slot_time)}</span></div>`
+    ).join('');
+    return `
+      <div class="admin-slot-block">
+        <div style="padding:10px 0 4px; font-family:var(--mono); font-size:10.5px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase;">${day} · ${rows.length} vote${rows.length===1?'':'s'}</div>
+        <div class="riders-panel admin">${items}</div>
+      </div>`;
+  }).join('');
+  return `<div class="section-title">Voting History (this week · ${voteHistory.length} total)</div>${dayBlocks}`;
+}
+
 function renderAdmin(){
   const campusSlots = slots.filter(s=>s.direction==='to_campus');
   const residenceSlots = slots.filter(s=>s.direction==='to_residence');
@@ -776,6 +887,7 @@ function renderAdmin(){
       ${metrics}
       ${renderChangeRequestsSection()}
       ${groups}
+      ${renderVoteHistorySection()}
       <div class="section-title">Danger zone</div>
       <button class="btn btn-danger" id="resetVotes" style="width:100%; padding:12px; border-radius:6px;">Clear all bookings</button>
     </main>
