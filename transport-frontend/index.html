@@ -162,6 +162,15 @@
   .metric-sub{ font-size:11px; color:var(--text-dimmer); margin-top:6px; font-family:var(--mono); }
   .admin-slot-block{ border-bottom:1px solid var(--line-soft); }
   .admin-slot-block:last-child{ border-bottom:none; }
+  .cr-card{ border:1px solid var(--amber-dim); background:var(--amber-wash); border-radius:8px; padding:14px; margin-bottom:12px; }
+  .cr-card:last-child{ margin-bottom:0; }
+  .cr-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:10px; }
+  .cr-meta{ font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .cr-note{ margin-top:4px; color:var(--text); }
+  .cr-thumb-wrap{ display:flex; justify-content:center; background:var(--plate); border-radius:6px; border:1px solid var(--line); padding:6px; margin-bottom:10px; }
+  .cr-thumb{ max-width:100%; max-height:220px; object-fit:contain; border-radius:4px; cursor:zoom-in; display:block; }
+  .lightbox-overlay{ position:fixed; inset:0; background:rgba(6,7,4,.92); display:flex; align-items:center; justify-content:center; z-index:70; padding:24px; cursor:zoom-out; }
+  .lightbox-overlay img{ max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 0 0 1px var(--line); }
   .admin-row{ display:flex; gap:8px; align-items:center; padding:10px 0; }
   .admin-row input{ padding:8px; font-size:13px; }
   .admin-row .btn-danger{ background:var(--red-dim); color:var(--red); border:none; padding:8px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:var(--sans); font-weight:600;}
@@ -388,19 +397,18 @@ function renderGate(){
           <div class="tab ${mode==='signup'?'active':''}" data-gate-mode="signup">Create Account</div>
         </div>
         ${mode==='login' ? `
-          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
-          <input type="text" id="loginId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+          <div class="field-label" style="margin-top:16px;">Student Number</div>
+          <input type="text" id="loginId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
             maxlength="${STUDENT_ID_MAXLEN}">
           <div class="field-label" style="margin-top:12px;">Password</div>
           <input type="password" id="loginPw" placeholder="Your password" autocomplete="off">
           <div style="text-align:right; margin-top:8px;"><span id="forgotPwLink" style="color:var(--amber); font-size:12px; font-weight:600; cursor:pointer;">Forgot password?</span></div>
           <button class="btn btn-primary" id="loginBtn">Log In</button>
-          <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password. Ask a fellow resident for the code to add to the end of your student number.</div>
+          <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password.</div>
         ` : `
-          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
-          <input type="text" id="suId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+          <div class="field-label" style="margin-top:16px;">Student Number</div>
+          <input type="text" id="suId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
             maxlength="${STUDENT_ID_MAXLEN}">
-          <div class="field-label" style="margin-top:4px; text-transform:none; letter-spacing:0; font-size:11px; color:var(--text-dimmer);">Ask a fellow resident for the code that goes at the end.</div>
           <div class="field-label" style="margin-top:12px;">Username (your real name)</div>
           <input type="text" id="suName" placeholder="e.g. Thandi Nkosi" autocomplete="off">
           <div class="field-label" style="margin-top:16px;">Security Questions <span style="color:var(--text-dimmer); text-transform:none; letter-spacing:0;">(used to reset your password if you forget it — not case sensitive)</span></div>
@@ -440,7 +448,7 @@ function bindGate(){
     async function doLogin(){
       const id = idInp.value.trim();
       const pw = pwInp.value;
-      if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
+      if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
       if(!pw){ showToast('Enter your password'); return; }
       btn.disabled = true; btn.textContent = 'Checking…';
       try{
@@ -474,7 +482,7 @@ function bindGate(){
       const secMatric = secMatricInp.value.trim();
       const pw = pwInp.value;
       const pw2 = pw2Inp.value;
-      if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
+      if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
       if(!name){ showToast('Enter a username (your real name)'); return; }
       if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions — you\'ll need them to reset your password'); return; }
       if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
@@ -709,8 +717,8 @@ function openForgotPasswordModal(){
     <div class="modal">
       <h3>Reset your password</h3>
       <p>Enter your student number and answer your security questions. Answers aren't case sensitive.</p>
-      <div class="field-label">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
-      <input type="text" id="rpId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+      <div class="field-label">Student Number</div>
+      <input type="text" id="rpId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
         maxlength="${STUDENT_ID_MAXLEN}" style="margin-bottom:14px;">
       <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">What is your mother's name?</div>
       <input type="text" id="rpSecMother" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
@@ -738,7 +746,7 @@ function openForgotPasswordModal(){
     const secMatric = document.getElementById('rpSecMatric').value.trim();
     const pw = document.getElementById('rpPw').value;
     const pw2 = document.getElementById('rpPw2').value;
-    if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
+    if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
     if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions'); return; }
     if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
     if(pw!==pw2){ showToast('Passwords do not match'); return; }
@@ -865,13 +873,18 @@ function renderChangeRequestsSection(){
     const slot = slots.find(s=>s.id===r.slot_id);
     const dirLabel = DIRECTIONS.find(d=>d.id===r.direction)?.label || r.direction;
     return `
-      <div class="admin-slot-block" style="padding:12px 0;">
-        <div style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">
-          <span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span> · ${dirLabel} · currently ${slot ? slot.time : '—'}</span>
-          ${r.note ? `<div style="margin-top:4px; color:var(--text);">${escapeHtml(r.note)}</div>` : ''}
+      <div class="cr-card">
+        <div class="cr-head">
+          <div class="cr-meta">
+            <span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span> · ${dirLabel} · currently ${slot ? slot.time : '—'}</span>
+            ${r.note ? `<div class="cr-note">${escapeHtml(r.note)}</div>` : ''}
+          </div>
+          <span class="tag tag-low">Needs review</span>
         </div>
-        <img src="${r.image_data_url}" style="max-width:100%; border-radius:6px; border:1px solid var(--line); display:block;" />
-        <div style="display:flex; gap:8px; margin-top:8px;">
+        <div class="cr-thumb-wrap">
+          <img class="cr-thumb" src="${r.image_data_url}" data-lightbox="${r.id}" />
+        </div>
+        <div style="display:flex; gap:8px;">
           <button class="btn btn-primary" style="margin-top:0; flex:1; padding:10px;" data-approve="${r.id}">Approve — release seat</button>
           <button class="btn-danger" data-reject="${r.id}" style="flex:1; border-radius:6px; padding:10px;">Reject</button>
         </div>
@@ -991,6 +1004,12 @@ function bindAdmin(){
     }
     render();
   });
+  document.querySelectorAll('[data-lightbox]').forEach(img=>{
+    img.addEventListener('click', ()=>{
+      const req = adminChangeRequests.find(r=>r.id===img.dataset.lightbox);
+      if(req) openImageLightbox(req.image_data_url);
+    });
+  });
   document.querySelectorAll('[data-admin-riders-toggle]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const id = btn.dataset.adminRidersToggle;
@@ -1094,6 +1113,14 @@ function bindAdmin(){
       });
     });
   });
+}
+
+function openImageLightbox(url){
+  const div = document.createElement('div');
+  div.className='lightbox-overlay';
+  div.innerHTML = `<img src="${url}" />`;
+  div.addEventListener('click', ()=> div.remove());
+  document.body.appendChild(div);
 }
 
 function showModal(title, body, onConfirm){
