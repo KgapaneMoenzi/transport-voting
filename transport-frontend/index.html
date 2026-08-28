@@ -190,7 +190,12 @@ const DIRECTIONS = [
 ];
 const DEFAULT_CAPACITY = 13;
 const CHANGE_WINDOW_MS = 10 * 60 * 1000;
-const STUDENT_ID_LENGTH = 9;
+// Student numbers must end with this suffix (e.g. "220456789@RSM"). Only
+// students who've been told to add it can register or log in — it's a
+// shared code, not tied to any real student-number format.
+const STUDENT_ID_DIGITS = 9;
+const STUDENT_ID_SUFFIX = '@RSM';
+const STUDENT_ID_MAXLEN = STUDENT_ID_DIGITS + STUDENT_ID_SUFFIX.length;
 // Slots are specific departure times today. Once a slot's time has gone
 // by, it can no longer be booked or switched to — mirrors the server's
 // own check, purely so the UI can show "Passed" immediately rather than
@@ -276,10 +281,12 @@ function hasSlotPassed(timeStr){
 }
 
 function sanitizeStudentIdInput(inputEl){
-  const digitsOnly = inputEl.value.replace(/\D/g, '').slice(0, STUDENT_ID_LENGTH);
-  if (inputEl.value !== digitsOnly) inputEl.value = digitsOnly;
+  // Keep only digits and the letters/@ needed to type the suffix, and
+  // uppercase it so "@rsm" becomes "@RSM" as the person types.
+  const cleaned = inputEl.value.toUpperCase().replace(/[^0-9@RSM]/g, '').slice(0, STUDENT_ID_MAXLEN);
+  if (inputEl.value !== cleaned) inputEl.value = cleaned;
 }
-function isValidStudentId(id){ return new RegExp(`^\\d{${STUDENT_ID_LENGTH}}$`).test(id); }
+function isValidStudentId(id){ return new RegExp(`^\\d{${STUDENT_ID_DIGITS}}${STUDENT_ID_SUFFIX}$`).test(id); }
 
 function startCountdownIfNeeded(){
   clearCountdown();
@@ -381,19 +388,28 @@ function renderGate(){
           <div class="tab ${mode==='signup'?'active':''}" data-gate-mode="signup">Create Account</div>
         </div>
         ${mode==='login' ? `
-          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_LENGTH} digits)</div>
-          <input type="text" id="loginId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
-            inputmode="numeric" pattern="[0-9]*" maxlength="${STUDENT_ID_LENGTH}">
+          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
+          <input type="text" id="loginId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+            maxlength="${STUDENT_ID_MAXLEN}">
           <div class="field-label" style="margin-top:12px;">Password</div>
           <input type="password" id="loginPw" placeholder="Your password" autocomplete="off">
+          <div style="text-align:right; margin-top:8px;"><span id="forgotPwLink" style="color:var(--amber); font-size:12px; font-weight:600; cursor:pointer;">Forgot password?</span></div>
           <button class="btn btn-primary" id="loginBtn">Log In</button>
-          <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password.</div>
+          <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password. Ask a fellow resident for the code to add to the end of your student number.</div>
         ` : `
-          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_LENGTH} digits)</div>
-          <input type="text" id="suId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
-            inputmode="numeric" pattern="[0-9]*" maxlength="${STUDENT_ID_LENGTH}">
+          <div class="field-label" style="margin-top:16px;">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
+          <input type="text" id="suId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+            maxlength="${STUDENT_ID_MAXLEN}">
+          <div class="field-label" style="margin-top:4px; text-transform:none; letter-spacing:0; font-size:11px; color:var(--text-dimmer);">Ask a fellow resident for the code that goes at the end.</div>
           <div class="field-label" style="margin-top:12px;">Username (your real name)</div>
           <input type="text" id="suName" placeholder="e.g. Thandi Nkosi" autocomplete="off">
+          <div class="field-label" style="margin-top:16px;">Security Questions <span style="color:var(--text-dimmer); text-transform:none; letter-spacing:0;">(used to reset your password if you forget it — not case sensitive)</span></div>
+          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">What is your mother's name?</div>
+          <input type="text" id="suSecMother" placeholder="e.g. Nomvula" autocomplete="off">
+          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">What primary school did you attend?</div>
+          <input type="text" id="suSecSchool" placeholder="e.g. Riverside Primary" autocomplete="off">
+          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">When did you complete matric? (year)</div>
+          <input type="text" id="suSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4">
           <div class="field-label" style="margin-top:12px;">Password</div>
           <input type="password" id="suPw" placeholder="Choose a password (min 4 characters)" autocomplete="off">
           <div class="field-label" style="margin-top:12px;">Confirm Password</div>
@@ -420,10 +436,11 @@ function bindGate(){
     const pwInp = document.getElementById('loginPw');
     const btn = document.getElementById('loginBtn');
     idInp.addEventListener('input', ()=> sanitizeStudentIdInput(idInp));
+    document.getElementById('forgotPwLink').addEventListener('click', openForgotPasswordModal);
     async function doLogin(){
       const id = idInp.value.trim();
       const pw = pwInp.value;
-      if(!isValidStudentId(id)){ showToast(`Student number must be exactly ${STUDENT_ID_LENGTH} digits`); return; }
+      if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
       if(!pw){ showToast('Enter your password'); return; }
       btn.disabled = true; btn.textContent = 'Checking…';
       try{
@@ -442,6 +459,9 @@ function bindGate(){
   } else {
     const idInp = document.getElementById('suId');
     const nameInp = document.getElementById('suName');
+    const secMotherInp = document.getElementById('suSecMother');
+    const secSchoolInp = document.getElementById('suSecSchool');
+    const secMatricInp = document.getElementById('suSecMatric');
     const pwInp = document.getElementById('suPw');
     const pw2Inp = document.getElementById('suPw2');
     const btn = document.getElementById('signupBtn');
@@ -449,15 +469,22 @@ function bindGate(){
     async function doSignup(){
       const id = idInp.value.trim();
       const name = nameInp.value.trim();
+      const secMother = secMotherInp.value.trim();
+      const secSchool = secSchoolInp.value.trim();
+      const secMatric = secMatricInp.value.trim();
       const pw = pwInp.value;
       const pw2 = pw2Inp.value;
-      if(!isValidStudentId(id)){ showToast(`Student number must be exactly ${STUDENT_ID_LENGTH} digits`); return; }
+      if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
       if(!name){ showToast('Enter a username (your real name)'); return; }
+      if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions — you\'ll need them to reset your password'); return; }
       if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
       if(pw!==pw2){ showToast('Passwords do not match'); return; }
       btn.disabled = true; btn.textContent = 'Creating…';
       try{
-        const data = await api('/auth/signup', { method:'POST', body: JSON.stringify({ studentId:id, username:name, password:pw }) });
+        const data = await api('/auth/signup', { method:'POST', body: JSON.stringify({
+          studentId:id, username:name, password:pw,
+          securityMother:secMother, securitySchool:secSchool, securityMatric:secMatric
+        }) });
         studentToken = data.token; role = 'student'; studentId = data.studentId; currentUsername = data.username;
         await loadBoardData();
         view = 'board'; render();
@@ -671,6 +698,63 @@ function openAdminGate(){
       view='admin'; render();
     }catch(err){
       showToast(err.message);
+    }
+  });
+}
+
+function openForgotPasswordModal(){
+  const div = document.createElement('div');
+  div.className='overlay'; div.id='overlay';
+  div.innerHTML = `
+    <div class="modal">
+      <h3>Reset your password</h3>
+      <p>Enter your student number and answer your security questions. Answers aren't case sensitive.</p>
+      <div class="field-label">Student Number (${STUDENT_ID_DIGITS} digits + ${STUDENT_ID_SUFFIX})</div>
+      <input type="text" id="rpId" placeholder="e.g. 220456789${STUDENT_ID_SUFFIX}" autocomplete="off" autocapitalize="off"
+        maxlength="${STUDENT_ID_MAXLEN}" style="margin-bottom:14px;">
+      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">What is your mother's name?</div>
+      <input type="text" id="rpSecMother" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
+      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">What primary school did you attend?</div>
+      <input type="text" id="rpSecSchool" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
+      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">When did you complete matric? (year)</div>
+      <input type="text" id="rpSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4" style="margin-bottom:14px;">
+      <div class="field-label">New Password</div>
+      <input type="password" id="rpPw" placeholder="Choose a new password (min 4 characters)" autocomplete="off" style="margin-bottom:14px;">
+      <div class="field-label">Confirm New Password</div>
+      <input type="password" id="rpPw2" placeholder="Repeat new password" autocomplete="off" style="margin-bottom:16px;">
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="submitResetBtn" style="margin-top:0;">Reset Password</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+  const idInp = document.getElementById('rpId');
+  idInp.addEventListener('input', ()=> sanitizeStudentIdInput(idInp));
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('submitResetBtn').addEventListener('click', async ()=>{
+    const id = idInp.value.trim();
+    const secMother = document.getElementById('rpSecMother').value.trim();
+    const secSchool = document.getElementById('rpSecSchool').value.trim();
+    const secMatric = document.getElementById('rpSecMatric').value.trim();
+    const pw = document.getElementById('rpPw').value;
+    const pw2 = document.getElementById('rpPw2').value;
+    if(!isValidStudentId(id)){ showToast(`Student number must be ${STUDENT_ID_DIGITS} digits followed by ${STUDENT_ID_SUFFIX}`); return; }
+    if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions'); return; }
+    if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
+    if(pw!==pw2){ showToast('Passwords do not match'); return; }
+    const btn = document.getElementById('submitResetBtn');
+    btn.disabled = true; btn.textContent = 'Resetting…';
+    try{
+      await api('/auth/reset-password', { method:'POST', body: JSON.stringify({
+        studentId:id, newPassword:pw,
+        securityMother:secMother, securitySchool:secSchool, securityMatric:secMatric
+      }) });
+      closeModal();
+      showToast('Password reset — you can log in now.');
+    }catch(err){
+      showToast(err.message);
+    }finally{
+      btn.disabled=false; btn.textContent='Reset Password';
     }
   });
 }

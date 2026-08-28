@@ -8,6 +8,15 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Security-question answers (hashed, same as password_hash), used for
+-- self-service "forgot password" resets. Nullable so this migration is
+-- safe to run against a table that already has accounts in it — those
+-- older accounts just won't be eligible for self-service reset until
+-- they're backfilled (see auth.js /reset-password for that check).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS security_mother_hash TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS security_school_hash TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS security_matric_hash TEXT;
+
 CREATE TABLE IF NOT EXISTS slots (
   id        TEXT PRIMARY KEY,
   direction TEXT NOT NULL CHECK (direction IN ('to_campus', 'to_residence')),
