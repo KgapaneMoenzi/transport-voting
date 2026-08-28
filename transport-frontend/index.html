@@ -164,6 +164,7 @@
   .admin-add{ display:grid; grid-template-columns:1fr 1fr 70px; gap:8px; margin-top:14px; }
   .admin-add .btn{ margin-top:0; grid-column:1/4; }
   .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-family:var(--mono); font-size:13px;}
+  .dev-credit{ margin-top:6px; font-family:var(--mono); font-size:9px; color:var(--text-dimmer); letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -362,7 +363,10 @@ function renderGate(){
         `}
       </div>
     </main>
-    <footer><span class="admin-link" id="adminLink">Admin</span></footer>
+    <footer>
+      <span class="admin-link" id="adminLink">Admin</span>
+      <div class="dev-credit">Developed by Kgapane Moenzi</div>
+    </footer>
   `;
 }
 function bindGate(){
@@ -560,7 +564,10 @@ function renderBoard(animate, changedIds){
       </div>
       ${lockedBanner}
     </main>
-    <footer><span class="admin-link" id="adminLink">Admin</span></footer>
+    <footer>
+      <span class="admin-link" id="adminLink">Admin</span>
+      <div class="dev-credit">Developed by Kgapane Moenzi</div>
+    </footer>
   `;
 }
 
