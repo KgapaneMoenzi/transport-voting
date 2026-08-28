@@ -170,8 +170,14 @@
 <div id="app"><div class="loading">Loading board…</div></div>
 
 <script>
-  
-const API_BASE = 'http://localhost:3000/api';
+
+// Points at your live Render backend by default.
+// If you happen to load this page from localhost (e.g. testing with `node src/server.js` running locally),
+// it automatically falls back to your local API instead, so you don't have to edit this by hand.
+const PROD_API_BASE = 'https://transport-voting.onrender.com/api';
+const LOCAL_API_BASE = 'http://localhost:4000/api';
+const isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+const API_BASE = isLocalHost ? LOCAL_API_BASE : PROD_API_BASE;
 
 const DIRECTIONS = [
   { id:'to_campus', label:'To Campus' },

@@ -26,7 +26,7 @@ app.use('/api/change-requests', changeRequestsRoutes);
 
 // ✅ Root route for homepage
 app.get('/', (req, res) => {
-  res.send('Transport Voting API is running 🚀');
+  res.send('Transport Voting API is running ');
 });
 
 // 404 handler (keep last)
