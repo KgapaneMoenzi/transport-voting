@@ -1,1197 +1,2808 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>RSM Student Accommodation — Transport Board</title>
-<meta name="description" content="RSM Student Accommodation's live transport booking board — book your shuttle to campus or residence, see open seats in real time, and manage your slot.">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>RSM Student Accommodation — Transport Board</title>
+    <meta name="description" content="RSM Student Accommodation's live transport booking board — book your shuttle to campus or residence, see open seats in real time, and manage your slot." />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png" />
+    <link rel="icon" href="favicon.ico" />
+    <meta name="theme-color" content="#0b0c07" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="RSM Student Accommodation — Transport Board" />
+    <meta property="og:description" content="Live transport booking board — book your shuttle to campus or residence and see open seats in real time." />
+    <meta property="og:image" content="logo-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="RSM Student Accommodation — Transport Board" />
+    <meta name="twitter:description" content="Live transport booking board — book your shuttle to campus or residence and see open seats in real time." />
+    <meta name="twitter:image" content="logo-512.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+        /* ─── RESET & ROOT ─── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
-<link rel="icon" href="favicon.ico">
-<meta name="theme-color" content="#0b0c07">
+        :root {
+            /* Neon cyberpunk palette – keep the vibe */
+            --bg: #0a0b10;
+            --bg-soft: #12141c;
+            --panel: rgba(18, 20, 30, 0.75);
+            --panel-2: rgba(10, 12, 20, 0.6);
+            --panel-3: rgba(30, 35, 50, 0.5);
+            --plate: rgba(255, 255, 255, 0.04);
+            --line: rgba(0, 255, 255, 0.15);
+            --line-soft: rgba(0, 255, 255, 0.08);
+            --line-hover: rgba(0, 255, 255, 0.3);
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="RSM Student Accommodation — Transport Board">
-<meta property="og:description" content="Live transport booking board — book your shuttle to campus or residence and see open seats in real time.">
-<meta property="og:image" content="logo-512.png">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RSM Student Accommodation — Transport Board">
-<meta name="twitter:description" content="Live transport booking board — book your shuttle to campus or residence and see open seats in real time.">
-<meta name="twitter:image" content="logo-512.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0b0c07;
-    --panel:#141509;
-    --panel-2:#1b1c10;
-    --plate:#0e0f09;
-    --line:#2b2c1c;
-    --line-soft:#1f2013;
-    --amber:#ffb400;
-    --amber-dim:#6b5220;
-    --amber-wash:rgba(255,180,0,.08);
-    --green:#38d97f;
-    --green-dim:#1a3d29;
-    --green-wash:rgba(56,217,127,.08);
-    --red:#ff5c4c;
-    --red-dim:#42221c;
-    --red-wash:rgba(255,92,76,.07);
-    --text:#f3f0e3;
-    --text-dim:#89897a;
-    --text-dimmer:#5b5c4d;
-    --mono:'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:var(--sans);
-    min-height:100vh;
-    display:flex; justify-content:center;
-  }
-  #app{ width:100%; max-width:460px; min-height:100vh; display:flex; flex-direction:column; position:relative; }
-  @media (min-width:760px){ #app{ max-width:820px; } }
-  @media (min-width:1180px){ #app{ max-width:1160px; } }
-  #app::before{
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background:linear-gradient(90deg, transparent, var(--amber) 20%, var(--amber) 80%, transparent);
-    opacity:.6;
-  }
-  header{ padding:22px 18px 16px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, #121307, var(--bg)); }
-  @media (min-width:760px){ header{ padding:30px 34px 22px; } header h1{ font-size:30px; } header .sub{ font-size:14.5px; } }
-  .board-id{ display:flex; align-items:center; gap:7px; margin-bottom:10px; }
-  .live-dot{ width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 6px 1px rgba(255,180,0,.7); }
-  @media (prefers-reduced-motion: no-preference){ .live-dot{ animation:dotPulse 2.2s ease-in-out infinite; } }
-  @keyframes dotPulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-  .eyebrow{ font-family:var(--mono); font-size:10.5px; letter-spacing:3px; color:var(--amber); text-transform:uppercase; }
-  h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:-.01em; }
-  .sub{ color:var(--text-dim); font-size:13px; margin-top:5px; }
-  .sync-line{ display:flex; align-items:center; gap:6px; margin-top:9px; font-family:var(--mono); font-size:10.5px; color:var(--text-dimmer); letter-spacing:.5px; }
-  .sync-line .live-dot{ width:5px; height:5px; }
-  main{ flex:1; padding:16px; padding-bottom:90px; }
-  @media (min-width:760px){ main{ padding:26px 34px 100px; } }
-  @media (min-width:760px){ .gate, .board, .stats-bar, .locked-banner, .admin-metrics, .admin-add{ max-width:720px; } }
-  @media (min-width:1180px){ .gate, .board, .stats-bar, .locked-banner, .admin-metrics, .admin-add{ max-width:900px; } }
-  .stats-bar{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--panel); border:1px solid var(--line); border-radius:6px; margin-bottom:14px; font-family:var(--mono); font-size:10.5px; color:var(--text-dim); }
-  .stats-bar span:first-child{ white-space:nowrap; text-transform:uppercase; letter-spacing:1px; }
-  .stats-track{ flex:1; height:4px; background:var(--line-soft); border-radius:2px; overflow:hidden; }
-  .stats-fill{ height:100%; background:var(--amber); border-radius:2px; transition:width .6s ease; }
-  .stats-num{ color:var(--amber); font-weight:500; white-space:nowrap; }
-  .gate{ margin-top:26px; }
-  .field-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; color:var(--text-dim); margin-bottom:8px; text-transform:uppercase;}
-  input[type=text], input[type=password]{ width:100%; padding:14px 12px; font-size:16px; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--text); font-family:var(--mono); letter-spacing:1px; box-sizing:border-box; }
-  input[type=text]:focus, input[type=password]:focus{ outline:none; border-color:var(--amber); }
-  .btn{ width:100%; padding:14px; border-radius:6px; border:none; margin-top:14px; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--sans); letter-spacing:.2px; }
-  .btn-primary{ background:var(--amber); color:#1a1206; }
-  .btn-primary:disabled{ background:#3a3226; color:#6b6152; cursor:not-allowed; }
-  .btn-ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
-  .btn-outline-red{ background:transparent; color:var(--red); border:1px solid var(--red-dim); }
-  .gate-note{ margin-top:22px; padding:12px 14px; border-radius:6px; background:var(--panel); border:1px dashed var(--line); font-size:12px; color:var(--text-dim); line-height:1.5; }
-  .tabs{ display:flex; gap:8px; margin-bottom:18px; }
-  .tab{ flex:1; padding:10px 8px; text-align:center; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--text-dim); font-size:12px; font-weight:600; cursor:pointer; font-family:var(--mono); letter-spacing:1px; text-transform:uppercase; transition:transform .1s, background .15s; }
-  .tab.active{ background:var(--amber-wash); color:var(--amber); border-color:var(--amber-dim); }
-  .tab:active{ transform:scale(.97); }
-  .id-chip{ display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--text-dim); padding:9px 11px; background:var(--panel); border:1px solid var(--line); border-radius:6px; margin-bottom:16px; letter-spacing:.5px; }
-  .id-chip span b{ color:var(--text); }
-  .id-chip button{ background:none; border:none; color:var(--amber); font-size:11px; cursor:pointer; font-family:var(--sans); font-weight:600;}
-  .board{ border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,.3); }
-  .board-head{ display:grid; grid-template-columns:96px 1fr 96px; padding:9px 12px; background:var(--panel-2); border-bottom:1px solid var(--line); font-family:var(--mono); font-size:9.5px; letter-spacing:2px; color:var(--text-dimmer); text-transform:uppercase; }
-  .board-head span:last-child{ text-align:right; }
-  .slot-wrap{ border-bottom:1px solid var(--line-soft); }
-  .slot-wrap:last-child{ border-bottom:none; }
-  .slot-row{ display:grid; grid-template-columns:96px 1fr 96px; align-items:center; padding:13px 12px; background:var(--panel); cursor:pointer; transition:background .15s, transform .1s; position:relative; }
-  .riders-toggle{ display:block; width:100%; text-align:left; background:var(--panel-2); border:none; border-top:1px dashed var(--line-soft); color:var(--text-dim); font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:7px 12px; cursor:pointer; }
-  .riders-toggle:hover{ color:var(--amber); }
-  .riders-panel{ background:var(--plate); padding:8px 12px 10px; }
-  .riders-panel.admin{ padding:8px 0 10px; }
-  .riders-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:var(--mono); font-size:11.5px; color:var(--text); padding:5px 0; border-bottom:1px solid var(--line-soft); }
-  .riders-item:last-child{ border-bottom:none; }
-  .riders-meta{ color:var(--text-dimmer); font-size:10px; white-space:nowrap; }
-  .riders-you{ color:var(--amber); font-weight:600; }
-  .riders-empty{ color:var(--text-dimmer); font-size:11.5px; font-family:var(--mono); padding:6px 0; }
-  .slot-row:active{ background:var(--panel-2); transform:scale(.985); }
-  .slot-row.full{ cursor:not-allowed; opacity:0.5; }
-  .slot-row.passed{ cursor:not-allowed; opacity:0.4; }
-  .slot-row.mine{ background:var(--green-wash); }
-  .slot-meta{ font-size:11.5px; color:var(--text-dim); font-family:var(--mono); }
-  .slot-status{ text-align:right; }
-  .occupancy{ margin-top:6px; height:3px; width:100%; max-width:120px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
-  .occupancy-fill{ height:100%; border-radius:2px; transition:width .6s ease; background:var(--green); }
-  .occupancy-fill.low{ background:var(--amber); }
-  .occupancy-fill.full{ background:var(--red); }
-  @media (prefers-reduced-motion: no-preference){ .row-flash{ animation:rowFlash 1.2s ease; } }
-  @keyframes rowFlash{ 0%{ box-shadow:inset 0 0 0 999px var(--amber-wash); } 100%{ box-shadow:inset 0 0 0 999px rgba(0,0,0,0); } }
-  .flap-time{ display:flex; gap:3px; }
-  .flap-char{ width:18px; height:29px; border-radius:3px; background:var(--plate); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:500; font-size:18px; color:var(--amber); box-shadow:inset 0 0 0 1px var(--line); position:relative; overflow:hidden; }
-  .flap-char::after{ content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(0,0,0,.55); transform:translateY(-.5px); }
-  .flap-char.colon{ background:transparent; box-shadow:none; width:7px; color:var(--text-dimmer); font-size:14px; }
-  @media (prefers-reduced-motion: no-preference){ .flap-char.flap-anim{ animation:flapReveal .4s cubic-bezier(.2,.65,.3,1) both; transform-origin:50% 50%; } }
-  @keyframes flapReveal{ 0%{ transform:rotateX(-95deg); opacity:0; } 55%{ transform:rotateX(12deg); opacity:1; } 100%{ transform:rotateX(0deg); } }
-  .tag{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:4px; font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:1px; border:1px solid; text-transform:uppercase; white-space:nowrap; }
-  .tag-open{ color:var(--green); border-color:var(--green-dim); background:var(--green-wash); }
-  .tag-low{ color:var(--amber); border-color:var(--amber-dim); background:var(--amber-wash); }
-  @media (prefers-reduced-motion: no-preference){ .tag-low{ animation:tagPulse 1.7s ease-in-out infinite; } }
-  @keyframes tagPulse{ 0%,100%{opacity:1;} 50%{opacity:.5;} }
-  .tag-full{ color:var(--red); border-color:var(--red-dim); background:var(--red-wash); }
-  .tag-mine{ color:var(--green); border-color:var(--green); background:rgba(56,217,127,.14); }
-  .tag-dim{ color:var(--text-dimmer); border-color:var(--line); background:transparent; }
-  .locked-banner{ margin-top:14px; padding:13px 14px; border-radius:8px; background:var(--green-wash); border:1px solid var(--green-dim); font-size:13px; color:var(--green); display:flex; gap:10px; align-items:flex-start; line-height:1.5; }
-  .locked-banner.amber{ background:var(--amber-wash); border-color:var(--amber-dim); color:var(--amber); }
-  .locked-banner.blue{ background:rgba(90,150,220,.08); border-color:#2d4d6e; color:#8fb8e6; }
-  .locked-banner .banner-icon{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.5px; border:1px solid currentColor; border-radius:4px; padding:2px 5px; flex-shrink:0; margin-top:1px; }
-  .locked-banner .banner-body{ flex:1; color:var(--text); }
-  .locked-banner .banner-body b{ color:inherit; }
-  .banner-actions{ display:flex; gap:8px; margin-top:10px; }
-  .banner-actions .btn{ margin-top:0; padding:9px 12px; font-size:12px; }
-  .section-title{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin:22px 0 10px; }
-  .empty{ color:var(--text-dim); font-size:13px; padding:24px 4px; text-align:center; font-family:var(--mono); }
-  .overlay{ position:fixed; inset:0; background:rgba(6,7,4,0.78); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
-  @media (min-width:760px){ .overlay{ align-items:center; } }
-  .modal{ width:100%; max-width:460px; background:var(--panel-2); border-radius:14px 14px 0 0; padding:22px 20px 26px; border-top:1px solid var(--line); }
-  @media (min-width:760px){ .modal{ border-radius:14px; border:1px solid var(--line); } }
-  .modal h3{ margin:0 0 6px; font-size:16px; font-weight:700; }
-  .modal p{ color:var(--text-dim); font-size:13px; line-height:1.55; margin:0 0 18px; }
-  .modal-actions{ display:flex; gap:10px; }
-  .modal-actions .btn{ margin-top:0; }
-  .toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--panel-2); border:1px solid var(--line); color:var(--text); padding:10px 16px; border-radius:6px; font-size:13px; z-index:60; max-width:90%; text-align:center; font-family:var(--mono); }
-  @media (prefers-reduced-motion: no-preference){ .toast{ animation:toastIn .25s ease; } }
-  @keyframes toastIn{ from{ opacity:0; transform:translate(-50%,8px); } to{ opacity:1; transform:translate(-50%,0); } }
-  footer{ padding:14px 18px; border-top:1px solid var(--line); text-align:center; }
-  .admin-link{ color:var(--text-dimmer); font-size:10.5px; font-family:var(--mono); letter-spacing:1.5px; cursor:pointer; text-transform:uppercase; }
-  .admin-link:hover{ color:var(--text-dim); }
-  .admin-metrics{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
-  .metric-card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 14px 12px; position:relative; overflow:hidden; }
-  .metric-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:2px; }
-  .metric-card.campus::before{ background:var(--amber); }
-  .metric-card.residence::before{ background:var(--green); }
-  .metric-label{ display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:9.5px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px; }
-  .metric-dot{ width:6px; height:6px; border-radius:50%; }
-  .metric-card.campus .metric-dot{ background:var(--amber); }
-  .metric-card.residence .metric-dot{ background:var(--green); }
-  .metric-value{ font-family:var(--mono); font-size:30px; font-weight:500; line-height:1; color:var(--text); }
-  .metric-card.campus .metric-value{ color:var(--amber); }
-  .metric-card.residence .metric-value{ color:var(--green); }
-  .metric-sub{ font-size:11px; color:var(--text-dimmer); margin-top:6px; font-family:var(--mono); }
-  .admin-slot-block{ border-bottom:1px solid var(--line-soft); }
-  .admin-slot-block:last-child{ border-bottom:none; }
-  .cr-card{ border:1px solid var(--amber-dim); background:var(--amber-wash); border-radius:8px; padding:14px; margin-bottom:12px; }
-  .cr-card:last-child{ margin-bottom:0; }
-  .cr-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:10px; }
-  .cr-meta{ font-size:12px; color:var(--text-dim); line-height:1.5; }
-  .cr-note{ margin-top:4px; color:var(--text); }
-  .cr-thumb-wrap{ display:flex; justify-content:center; background:var(--plate); border-radius:6px; border:1px solid var(--line); padding:6px; margin-bottom:10px; }
-  .cr-thumb{ max-width:100%; max-height:220px; object-fit:contain; border-radius:4px; cursor:zoom-in; display:block; }
-  .lightbox-overlay{ position:fixed; inset:0; background:rgba(6,7,4,.92); display:flex; align-items:center; justify-content:center; z-index:70; padding:24px; cursor:zoom-out; }
-  .lightbox-overlay img{ max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 0 0 1px var(--line); }
-  .admin-row{ display:flex; gap:8px; align-items:center; padding:10px 0; }
-  .admin-row input{ padding:8px; font-size:13px; }
-  .admin-row .btn-danger{ background:var(--red-dim); color:var(--red); border:none; padding:8px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:var(--sans); font-weight:600;}
-  .admin-add{ display:grid; grid-template-columns:1fr 1fr 70px; gap:8px; margin-top:14px; }
-  .admin-add .btn{ margin-top:0; grid-column:1/4; }
-  .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); font-family:var(--mono); font-size:13px;}
-  .dev-credit{ margin-top:6px; font-family:var(--mono); font-size:9px; color:var(--text-dimmer); letter-spacing:1px; }
-</style>
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff00a0;
+            --neon-purple: #b388ff;
+            --neon-yellow: #ffea00;
+            --neon-cyan-dim: rgba(0, 240, 255, 0.2);
+            --neon-magenta-dim: rgba(255, 0, 160, 0.2);
+
+            --text: #f0f4ff;
+            --text-dim: #a0b0d0;
+            --text-dimmer: #6070a0;
+            --text-muted: #304060;
+
+            --shadow-sm: 0 4px 30px rgba(0, 0, 0, 0.6);
+            --shadow-md: 0 12px 60px rgba(0, 0, 0, 0.7);
+            --shadow-lg: 0 24px 100px rgba(0, 0, 0, 0.8);
+            --glow-cyan: 0 0 30px var(--neon-cyan-dim), 0 0 60px var(--neon-cyan-dim);
+            --glow-magenta: 0 0 30px var(--neon-magenta-dim), 0 0 60px var(--neon-magenta-dim);
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --radius-xl: 32px;
+
+            --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+            --transition: 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* ─── Animated background ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 160, 0.05) 0%, transparent 50%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(0, 240, 255, 0.01) 40px,
+                    rgba(0, 240, 255, 0.01) 41px),
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 0, 160, 0.01) 40px,
+                    rgba(255, 0, 160, 0.01) 41px);
+            background-size: 100% 100%, 100% 100%, 80px 80px, 80px 80px;
+            animation: bgShift 30s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes bgShift {
+            0% {
+                background-position: 0% 0%, 0% 0%, 0px 0px, 0px 0px;
+            }
+            100% {
+                background-position: 100% 100%, 100% 100%, 80px 80px, 80px 80px;
+            }
+        }
+
+        /* ─── Grid overlay ─── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        #app {
+            width: 100%;
+            max-width: 460px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(0px);
+        }
+
+        @media (min-width: 760px) {
+            #app {
+                max-width: 820px;
+            }
+        }
+        @media (min-width: 1180px) {
+            #app {
+                max-width: 1160px;
+            }
+        }
+
+        /* ─── Top Glow Bar ─── */
+        #app::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan) 20%, var(--neon-magenta) 60%, var(--neon-yellow) 80%, transparent);
+            opacity: 0.9;
+            z-index: 10;
+            filter: blur(1px);
+            box-shadow: 0 0 40px var(--neon-cyan), 0 0 80px var(--neon-magenta);
+            animation: barGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes barGlow {
+            0% {
+                opacity: 0.6;
+                filter: blur(1px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(3px);
+            }
+        }
+
+        /* ─── Header ─── */
+        header {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+            transition: background 0.3s;
+        }
+
+        @media (min-width: 760px) {
+            header {
+                padding: 32px 36px 24px;
+            }
+            .title-wrapper h1 {
+                font-size: 40px;
+            }
+            header .sub {
+                font-size: 16px;
+            }
+        }
+
+        .board-id {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            min-height: 1.4em;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 20px 6px var(--neon-cyan), 0 0 60px 12px var(--neon-cyan-dim);
+            flex-shrink: 0;
+            animation: dotPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 20px 6px var(--neon-cyan), 0 0 60px 12px var(--neon-cyan-dim);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.7);
+                box-shadow: 0 0 10px 2px var(--neon-cyan), 0 0 30px 6px var(--neon-cyan-dim);
+            }
+        }
+
+        .eyebrow {
+            font-family: var(--sans);
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--neon-magenta);
+            text-transform: uppercase;
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--neon-magenta), 0 0 60px var(--neon-magenta-dim);
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            0% {
+                text-shadow: 0 0 10px var(--neon-magenta), 0 0 30px var(--neon-magenta-dim);
+            }
+            100% {
+                text-shadow: 0 0 20px var(--neon-magenta), 0 0 60px var(--neon-magenta), 0 0 100px var(--neon-magenta-dim);
+            }
+        }
+
+        /* ─── Title with typewriter ─── */
+        .title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            min-height: 3rem;
+        }
+
+        .title-wrapper h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.2), 0 0 80px rgba(255, 0, 160, 0.1);
+            animation: titlePulse 4s ease-in-out infinite;
+            line-height: 1.1;
+            display: inline;
+        }
+
+        @keyframes titlePulse {
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.1em;
+            background: var(--neon-cyan);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 0.7s step-end infinite;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .cursor.cursor-eyebrow {
+            width: 2px;
+            height: 1em;
+            background: var(--neon-magenta);
+            box-shadow: 0 0 10px var(--neon-magenta);
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .sub {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-top: 6px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+            font-family: var(--sans);
+        }
+
+        /* ─── Terminal line ─── */
+        .terminal-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-dimmer);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border-left: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan-dim);
+            width: fit-content;
+            max-width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .terminal-line .prompt {
+            color: var(--neon-cyan);
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .terminal-line .cmd-text {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .terminal-line .terminal-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--neon-magenta);
+            animation: blink 0.7s step-end infinite;
+            box-shadow: 0 0 8px var(--neon-magenta);
+            vertical-align: middle;
+        }
+
+        .sync-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dimmer);
+            letter-spacing: 0.5px;
+        }
+
+        .sync-line .live-dot {
+            width: 6px;
+            height: 6px;
+            box-shadow: 0 0 12px 3px var(--neon-cyan), 0 0 30px 6px var(--neon-cyan-dim);
+        }
+
+        /* ─── Main ─── */
+        main {
+            flex: 1;
+            padding: 18px 16px 100px;
+        }
+
+        @media (min-width: 760px) {
+            main {
+                padding: 28px 36px 110px;
+            }
+        }
+
+        /* ─── Stats Bar ─── */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--panel);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            margin-bottom: 18px;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--text-dim);
+            box-shadow: var(--shadow-sm), 0 0 20px var(--neon-cyan-dim);
+        }
+
+        .stats-bar span:first-child {
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .stats-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .stats-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-magenta);
+        }
+
+        .stats-num {
+            color: var(--neon-cyan);
+            font-weight: 700;
+            white-space: nowrap;
+            font-size: 12px;
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        /* ─── Gate ─── */
+        .gate {
+            margin-top: 8px;
+        }
+
+        .field-label {
+            font-family: var(--sans);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.1);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 14px;
+            font-size: 15px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--line);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text);
+            font-family: var(--sans);
+            letter-spacing: 0.3px;
+            box-sizing: border-box;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 4px var(--neon-cyan-dim), 0 0 40px var(--neon-cyan-dim), inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        input::placeholder {
+            color: var(--text-dimmer);
+            font-family: var(--sans);
+            letter-spacing: 0.2px;
+            font-weight: 400;
+        }
+
+        /* ─── Buttons ─── */
+        .btn {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            border: none;
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--sans);
+            letter-spacing: 0.5px;
+            transition: background var(--transition), transform 0.1s, box-shadow var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), #0088ff);
+            color: #0a0b10;
+            box-shadow: 0 4px 30px var(--neon-cyan-dim), 0 0 60px var(--neon-cyan-dim);
+            font-weight: 800;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #66f0ff, #3399ff);
+            box-shadow: 0 6px 40px var(--neon-cyan), 0 0 80px var(--neon-cyan);
+        }
+
+        .btn-primary:disabled {
+            background: #304060;
+            color: #6070a0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-ghost {
+            background: rgba(0, 240, 255, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-dim);
+            border: 1.5px solid var(--line);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 30px var(--neon-cyan-dim);
+        }
+
+        .btn-outline-red {
+            background: transparent;
+            color: var(--neon-magenta);
+            border: 1.5px solid var(--neon-magenta-dim);
+        }
+
+        .btn-outline-red:hover {
+            background: var(--neon-magenta-dim);
+            border-color: var(--neon-magenta);
+            box-shadow: 0 0 40px var(--neon-magenta);
+        }
+
+        .btn-danger {
+            background: var(--neon-magenta-dim);
+            color: var(--neon-magenta);
+            border: none;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-weight: 600;
+            transition: background var(--transition);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 160, 0.3);
+            box-shadow: 0 0 30px var(--neon-magenta);
+        }
+
+        /* ─── Tabs ─── */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 11px 8px;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--line);
+            background: var(--panel);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-dim);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .tab:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan-dim);
+        }
+
+        .tab.active {
+            background: var(--neon-cyan-dim);
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 30px var(--neon-cyan), inset 0 0 20px var(--neon-cyan-dim);
+        }
+
+        .tab:active {
+            transform: scale(0.96);
+        }
+
+        /* ─── ID Chip ─── */
+        .id-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--text-dim);
+            padding: 10px 14px;
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            margin-bottom: 18px;
+            letter-spacing: 0.3px;
+            box-shadow: var(--shadow-sm), 0 0 20px var(--neon-cyan-dim);
+        }
+
+        .id-chip span b {
+            color: var(--neon-cyan);
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .id-chip button {
+            background: none;
+            border: none;
+            color: var(--neon-magenta);
+            font-size: 12px;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            text-shadow: 0 0 10px var(--neon-magenta);
+        }
+
+        .id-chip button:hover {
+            background: var(--neon-magenta-dim);
+            box-shadow: 0 0 20px var(--neon-magenta);
+        }
+
+        /* ─── Board ─── */
+        .board {
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-sm), 0 0 40px var(--neon-cyan-dim);
+        }
+
+        .board-head {
+            display: grid;
+            grid-template-columns: 96px 1fr 96px;
+            padding: 10px 14px;
+            background: var(--panel-2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
+            font-family: var(--sans);
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            color: var(--text-dimmer);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .board-head span:last-child {
+            text-align: right;
+        }
+
+        /* ─── Slot ─── */
+        .slot-wrap {
+            border-bottom: 1px solid var(--line-soft);
+            transition: background var(--transition);
+        }
+
+        .slot-wrap:last-child {
+            border-bottom: none;
+        }
+
+        .slot-row {
+            display: grid;
+            grid-template-columns: 96px 1fr 96px;
+            align-items: center;
+            padding: 14px 14px;
+            background: transparent;
+            cursor: pointer;
+            transition: background var(--transition), transform 0.1s;
+            position: relative;
+        }
+
+        .slot-row:hover:not(.full):not(.passed) {
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: inset 0 0 40px var(--neon-cyan-dim);
+        }
+
+        .slot-row:active:not(.full):not(.passed) {
+            transform: scale(0.98);
+        }
+
+        .slot-row.full {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        .slot-row.passed {
+            cursor: not-allowed;
+            opacity: 0.25;
+        }
+
+        .slot-row.mine {
+            background: rgba(0, 240, 255, 0.08);
+            border-left: 4px solid var(--neon-cyan);
+            box-shadow: inset 0 0 40px var(--neon-cyan-dim);
+        }
+
+        .slot-row.mine:hover {
+            background: rgba(0, 240, 255, 0.14);
+        }
+
+        .slot-meta {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: var(--sans);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .slot-status {
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .occupancy {
+            height: 5px;
+            width: 100%;
+            max-width: 120px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .occupancy-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .occupancy-fill.low {
+            background: var(--neon-magenta);
+            box-shadow: 0 0 20px var(--neon-magenta);
+        }
+
+        .occupancy-fill.full {
+            background: #ff3d00;
+            box-shadow: 0 0 20px #ff3d00;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .row-flash {
+                animation: rowFlash 0.6s ease;
+            }
+        }
+
+        @keyframes rowFlash {
+            0% {
+                box-shadow: inset 0 0 0 999px var(--neon-cyan-dim);
+            }
+            100% {
+                box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0);
+            }
+        }
+
+        /* ─── Flap Clock ─── */
+        .flap-time {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .flap-char {
+            width: 22px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--neon-cyan);
+            box-shadow: inset 0 0 0 1px var(--line), 0 0 20px var(--neon-cyan-dim), var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .flap-char::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: rgba(0, 240, 255, 0.2);
+            transform: translateY(-0.5px);
+        }
+
+        .flap-char.colon {
+            background: transparent;
+            box-shadow: none;
+            width: 6px;
+            color: var(--text-dimmer);
+            font-size: 14px;
+            text-shadow: none;
+        }
+
+        .flap-char.colon::after {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .flap-char.flap-anim {
+                animation: flapReveal 0.4s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+                transform-origin: 50% 50%;
+            }
+        }
+
+        @keyframes flapReveal {
+            0% {
+                transform: rotateX(-95deg);
+                opacity: 0;
+            }
+            55% {
+                transform: rotateX(12deg);
+                opacity: 1;
+            }
+            100% {
+                transform: rotateX(0deg);
+            }
+        }
+
+        /* ─── Tags ─── */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: var(--sans);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            border: 1px solid;
+            text-transform: uppercase;
+            white-space: nowrap;
+            line-height: 1.4;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .tag-open {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            background: var(--neon-cyan-dim);
+            box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan-dim);
+        }
+
+        .tag-low {
+            color: var(--neon-magenta);
+            border-color: var(--neon-magenta);
+            background: var(--neon-magenta-dim);
+            animation: tagPulse 1.4s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--neon-magenta), 0 0 40px var(--neon-magenta-dim);
+        }
+
+        @keyframes tagPulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(0.95);
+            }
+        }
+
+        .tag-full {
+            color: #ff3d00;
+            border-color: #ff3d00;
+            background: rgba(255, 61, 0, 0.1);
+            box-shadow: 0 0 20px #ff3d00;
+        }
+
+        .tag-mine {
+            color: var(--neon-yellow);
+            border-color: var(--neon-yellow);
+            background: rgba(255, 234, 0, 0.1);
+            box-shadow: 0 0 30px var(--neon-yellow), 0 0 60px rgba(255, 234, 0, 0.2);
+        }
+
+        .tag-dim {
+            color: var(--text-dimmer);
+            border-color: var(--line);
+            background: transparent;
+        }
+
+        /* ─── Riders Toggle ─── */
+        .riders-toggle {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: var(--panel-2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: none;
+            border-top: 1px solid var(--line-soft);
+            color: var(--text-dimmer);
+            font-family: var(--sans);
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 600;
+        }
+
+        .riders-toggle:hover {
+            color: var(--neon-cyan);
+            background: var(--panel-3);
+            box-shadow: 0 0 30px var(--neon-cyan-dim);
+        }
+
+        .riders-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 10px 14px 12px;
+            border-top: 1px solid var(--line-soft);
+        }
+
+        .riders-panel.admin {
+            padding: 8px 0 12px;
+        }
+
+        .riders-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--text);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.05);
+        }
+
+        .riders-item:last-child {
+            border-bottom: none;
+        }
+
+        .riders-meta {
+            color: var(--text-dimmer);
+            font-size: 10px;
+            white-space: nowrap;
+            font-family: var(--mono);
+        }
+
+        .riders-you {
+            color: var(--neon-yellow);
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--neon-yellow);
+        }
+
+        .riders-empty {
+            color: var(--text-dimmer);
+            font-size: 11px;
+            font-family: var(--sans);
+            padding: 4px 0;
+        }
+
+        /* ─── Locked Banner ─── */
+        .locked-banner {
+            margin-top: 16px;
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--line);
+            font-size: 13px;
+            color: var(--neon-cyan);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            line-height: 1.55;
+            box-shadow: var(--shadow-sm), 0 0 30px var(--neon-cyan-dim);
+            font-family: var(--sans);
+        }
+
+        .locked-banner.amber {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+            background: var(--neon-magenta-dim);
+            box-shadow: 0 0 40px var(--neon-magenta-dim);
+        }
+
+        .locked-banner.blue {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: var(--neon-cyan-dim);
+            box-shadow: 0 0 40px var(--neon-cyan-dim);
+        }
+
+        .locked-banner .banner-icon {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border: 1px solid currentColor;
+            border-radius: var(--radius-sm);
+            padding: 3px 8px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            box-shadow: 0 0 20px currentColor;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 10px currentColor;
+            }
+            50% {
+                box-shadow: 0 0 30px currentColor, 0 0 60px currentColor;
+            }
+        }
+
+        .locked-banner .banner-body {
+            flex: 1;
+            color: var(--text);
+        }
+
+        .locked-banner .banner-body b {
+            color: inherit;
+        }
+
+        .banner-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .banner-actions .btn {
+            margin-top: 0;
+            padding: 9px 14px;
+            font-size: 12px;
+            width: auto;
+            flex: 1 1 auto;
+            min-width: 120px;
+        }
+
+        /* ─── Gate Note ─── */
+        .gate-note {
+            margin-top: 22px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--panel);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px dashed var(--line);
+            font-size: 12.5px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-family: var(--sans);
+        }
+
+        /* ─── Section Title ─── */
+        .section-title {
+            font-family: var(--sans);
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin: 28px 0 12px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .empty {
+            color: var(--text-dimmer);
+            font-size: 13px;
+            padding: 30px 4px;
+            text-align: center;
+            font-family: var(--sans);
+        }
+
+        /* ─── Overlay / Modal ─── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 50;
+            padding: 16px;
+        }
+
+        @media (min-width: 760px) {
+            .overlay {
+                align-items: center;
+            }
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 460px;
+            background: var(--panel);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 26px 22px 28px;
+            border-top: 1px solid var(--line);
+            box-shadow: var(--shadow-lg), 0 0 60px var(--neon-cyan-dim);
+            animation: modalSlideUp 0.3s ease;
+        }
+
+        @media (min-width: 760px) {
+            .modal {
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--line);
+                animation: modalFadeIn 0.25s ease;
+            }
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                transform: scale(0.96);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal h3 {
+            margin: 0 0 6px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px var(--neon-cyan);
+            font-family: var(--sans);
+        }
+
+        .modal p {
+            color: var(--text-dim);
+            font-size: 13.5px;
+            line-height: 1.6;
+            margin: 0 0 20px;
+            font-family: var(--sans);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-actions .btn {
+            margin-top: 0;
+            flex: 1;
+        }
+
+        /* ─── Toast ─── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            z-index: 60;
+            max-width: 92%;
+            text-align: center;
+            font-family: var(--sans);
+            box-shadow: var(--shadow-lg), 0 0 40px var(--neon-cyan-dim);
+            font-weight: 500;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .toast {
+                animation: toastIn 0.3s ease;
+            }
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 12px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            padding: 16px 18px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+            background: var(--bg);
+        }
+
+        .admin-link {
+            color: var(--text-dimmer);
+            font-size: 10px;
+            font-family: var(--sans);
+            letter-spacing: 1.8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all var(--transition);
+            font-weight: 600;
+        }
+
+        .admin-link:hover {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .dev-credit {
+            margin-top: 6px;
+            font-family: var(--sans);
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 1.2px;
+            font-weight: 400;
+        }
+
+        /* ─── Admin ─── */
+        .admin-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .metric-card {
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 16px 16px 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm), 0 0 20px var(--neon-cyan-dim);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .metric-card.campus::before {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 30px var(--neon-cyan);
+        }
+        .metric-card.residence::before {
+            background: var(--neon-magenta);
+            box-shadow: 0 0 30px var(--neon-magenta);
+        }
+
+        .metric-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--sans);
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .metric-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .metric-card.campus .metric-dot {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+        .metric-card.residence .metric-dot {
+            background: var(--neon-magenta);
+            box-shadow: 0 0 20px var(--neon-magenta);
+        }
+
+        .metric-value {
+            font-family: var(--mono);
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 1;
+            color: var(--text);
+        }
+
+        .metric-card.campus .metric-value {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 30px var(--neon-cyan);
+        }
+        .metric-card.residence .metric-value {
+            color: var(--neon-magenta);
+            text-shadow: 0 0 30px var(--neon-magenta);
+        }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--text-dimmer);
+            margin-top: 6px;
+            font-family: var(--sans);
+            font-weight: 400;
+        }
+
+        .admin-slot-block {
+            border-bottom: 1px solid var(--line-soft);
+            padding: 8px 0;
+        }
+
+        .admin-slot-block:last-child {
+            border-bottom: none;
+        }
+
+        .admin-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 0;
+        }
+
+        .admin-row input[type="text"],
+        .admin-row input[type="number"] {
+            padding: 8px 10px;
+            font-size: 13px;
+            font-family: var(--sans);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .admin-row input[type="text"] {
+            width: 72px;
+        }
+        .admin-row input[type="number"] {
+            width: 62px;
+        }
+
+        .admin-row input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 3px var(--neon-cyan-dim);
+        }
+
+        .admin-add {
+            display: grid;
+            grid-template-columns: 1fr 1fr 70px;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .admin-add .btn {
+            margin-top: 0;
+            grid-column: 1 / 4;
+            padding: 12px;
+        }
+
+        /* ─── Change Request Cards ─── */
+        .cr-card {
+            border: 1px solid var(--neon-magenta);
+            background: var(--neon-magenta-dim);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm), 0 0 30px var(--neon-magenta-dim);
+        }
+
+        .cr-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .cr-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cr-meta {
+            font-size: 12.5px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            font-family: var(--sans);
+        }
+
+        .cr-note {
+            margin-top: 4px;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .cr-thumb-wrap {
+            display: flex;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--line);
+            padding: 6px;
+            margin-bottom: 12px;
+        }
+
+        .cr-thumb {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: zoom-in;
+            display: block;
+        }
+
+        /* ─── Lightbox ─── */
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 24px;
+            cursor: zoom-out;
+        }
+
+        .lightbox-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: var(--radius-md);
+            box-shadow: 0 0 0 1px var(--line), var(--shadow-lg), 0 0 80px var(--neon-cyan-dim);
+        }
+
+        /* ─── Loading ─── */
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-dim);
+            font-family: var(--sans);
+            font-size: 14px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-left: 12px;
+            border: 2px solid var(--line);
+            border-top-color: var(--neon-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ─── Responsive tweaks ─── */
+        @media (min-width: 760px) {
+            .gate,
+            .board,
+            .stats-bar,
+            .locked-banner,
+            .admin-metrics,
+            .admin-add {
+                max-width: 720px;
+            }
+        }
+
+        @media (min-width: 1180px) {
+            .gate,
+            .board,
+            .stats-bar,
+            .locked-banner,
+            .admin-metrics,
+            .admin-add {
+                max-width: 900px;
+            }
+        }
+
+        /* Small screens */
+        @media (max-width: 480px) {
+            .slot-row {
+                grid-template-columns: 80px 1fr 80px;
+                padding: 12px 10px;
+            }
+            .board-head {
+                grid-template-columns: 80px 1fr 80px;
+                padding: 8px 10px;
+                font-size: 8px;
+            }
+            .flap-char {
+                width: 18px;
+                height: 28px;
+                font-size: 15px;
+            }
+            .flap-char.colon {
+                width: 5px;
+                font-size: 12px;
+            }
+            .tag {
+                font-size: 8px;
+                padding: 3px 8px;
+            }
+            .modal {
+                padding: 20px 16px 22px;
+            }
+            .banner-actions .btn {
+                min-width: 80px;
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .admin-add {
+                grid-template-columns: 1fr 1fr;
+            }
+            .admin-add .btn {
+                grid-column: 1 / 3;
+            }
+        }
+    </style>
 </head>
 <body>
-<div id="app"><div class="loading">Loading board…</div></div>
+    <div id="app"><div class="loading">Loading board…</div></div>
 
-<script>
+    <script>
+        // ─── API CONFIG ──────────────────────────────────────────────────────────
+        const PROD_API_BASE = 'https://transport-voting.onrender.com/api';
+        const LOCAL_API_BASE = 'http://localhost:4000/api';
+        const isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+        const API_BASE = isLocalHost ? LOCAL_API_BASE : PROD_API_BASE;
 
-// Points at your live Render backend by default.
-// If you happen to load this page from localhost (e.g. testing with `node src/server.js` running locally),
-// it automatically falls back to your local API instead, so you don't have to edit this by hand.
-const PROD_API_BASE = 'https://transport-voting.onrender.com/api';
-const LOCAL_API_BASE = 'http://localhost:4000/api';
-const isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
-const API_BASE = isLocalHost ? LOCAL_API_BASE : PROD_API_BASE;
+        const DIRECTIONS = [
+            { id: 'to_campus', label: 'To Campus' },
+            { id: 'to_residence', label: 'To Residence' }
+        ];
+        const DEFAULT_CAPACITY = 13;
+        const CHANGE_WINDOW_MS = 10 * 60 * 1000;
+        const STUDENT_ID_DIGITS = 9;
+        const STUDENT_ID_SUFFIX = '@RSM';
+        const STUDENT_ID_MAXLEN = STUDENT_ID_DIGITS + STUDENT_ID_SUFFIX.length;
+        const SLOT_TIMEZONE = 'Africa/Johannesburg';
 
-const DIRECTIONS = [
-  { id:'to_campus', label:'To Campus' },
-  { id:'to_residence', label:'To Residence' }
-];
-const DEFAULT_CAPACITY = 13;
-const CHANGE_WINDOW_MS = 10 * 60 * 1000;
-// Student numbers must end with this suffix (e.g. "220456789@RSM"). Only
-// students who've been told to add it can register or log in — it's a
-// shared code, not tied to any real student-number format.
-const STUDENT_ID_DIGITS = 9;
-const STUDENT_ID_SUFFIX = '@RSM';
-const STUDENT_ID_MAXLEN = STUDENT_ID_DIGITS + STUDENT_ID_SUFFIX.length;
-// Slots are specific departure times today. Once a slot's time has gone
-// by, it can no longer be booked or switched to — mirrors the server's
-// own check, purely so the UI can show "Passed" immediately rather than
-// waiting for a rejected request. The server is the real enforcement.
-const SLOT_TIMEZONE = 'Africa/Johannesburg';
+        let studentToken = null,
+            studentId = '',
+            currentUsername = '';
+        let adminToken = null;
+        let role = null;
+        let gateMode = 'login';
+        let activeDirection = 'to_campus';
+        let view = 'gate';
+        let slots = [];
+        let myVotes = [];
+        let myChangeRequests = [];
+        let adminChangeRequests = [];
+        let voteHistory = [];
+        let ridersCache = {};
+        let countdownTimer = null;
+        let pollTimer = null;
+        let syncTickTimer = null;
+        let clockTickTimer = null;
+        let lastSyncedAt = Date.now();
+        let lastSnapshot = null;
+        let expandedBoardSlots = new Set();
+        let expandedAdminSlots = new Set();
 
-let studentToken = null, studentId = '', currentUsername = '';
-let adminToken = null;
-let role = null;
-let gateMode = 'login';
-let activeDirection = 'to_campus';
-let view = 'gate';
-let slots = [];
-let myVotes = [];
-let myChangeRequests = [];
-let adminChangeRequests = [];
-let voteHistory = [];
-let ridersCache = {};
-let countdownTimer = null;
-let pollTimer = null;
-let syncTickTimer = null;
-let clockTickTimer = null;
-let lastSyncedAt = Date.now();
-let lastSnapshot = null;
-let expandedBoardSlots = new Set();
-let expandedAdminSlots = new Set();
+        // ─── Typewriter effect (types both the eyebrow and the heading) ──────
+        let typewriterTimers = [];
 
-function activeToken(){ return role === 'admin' ? adminToken : studentToken; }
-async function api(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  const token = activeToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  let body = null;
-  try { body = await res.json(); } catch (e) {}
-  if (!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
-  return body;
-}
+        function clearAllTypewriterTimers() {
+            typewriterTimers.forEach(id => { clearInterval(id); clearTimeout(id); });
+            typewriterTimers = [];
+        }
 
-function normalizeVote(v){ return { direction: v.direction, slotId: v.slot_id, ts: Number(v.ts), originalTs: Number(v.original_ts) }; }
-async function refreshSlots(){ slots = await api('/slots'); }
-async function refreshMyVotes(){
-  if (role !== 'student') { myVotes = []; return; }
-  const rows = await api('/votes/mine');
-  myVotes = rows.map(normalizeVote);
-}
-async function refreshMyChangeRequests(){
-  if (role !== 'student') { myChangeRequests = []; return; }
-  myChangeRequests = await api('/change-requests/mine');
-}
-async function refreshAdminChangeRequests(){ adminChangeRequests = await api('/change-requests'); }
-async function refreshVoteHistory(){ voteHistory = await api('/history'); }
-async function refreshRiders(slotId){ ridersCache[slotId] = await api(`/votes/slot/${slotId}`); return ridersCache[slotId]; }
-async function loadBoardData(){ await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]); }
-async function loadAdminData(){ await Promise.all([refreshSlots(), refreshAdminChangeRequests(), refreshVoteHistory()]); }
+        function typeInto(textEl, cursorEl, text, initialDelay) {
+            if (!textEl) return;
+            if (cursorEl) cursorEl.style.display = 'inline-block';
+            textEl.textContent = '';
+            let index = 0;
+            let intervalId = null;
 
-function isEditable(vote){ return (Date.now() - vote.originalTs) < CHANGE_WINDOW_MS; }
-function msRemaining(vote){ return Math.max(0, CHANGE_WINDOW_MS - (Date.now() - vote.originalTs)); }
-function myVoteFor(direction){ return myVotes.find(v => v.direction === direction); }
-function fmtRemaining(ms){
-  const totalSec = Math.ceil(ms/1000);
-  const mm = Math.floor(totalSec/60), ss = totalSec%60;
-  return `${mm}:${ss.toString().padStart(2,'0')}`;
-}
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+            function typeChar() {
+                if (index < text.length) {
+                    textEl.textContent += text.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(intervalId);
+                    const pauseTimer = setTimeout(() => {
+                        textEl.textContent = '';
+                        index = 0;
+                        const restartTimer = setTimeout(() => {
+                            intervalId = setInterval(typeChar, 80);
+                            typewriterTimers.push(intervalId);
+                        }, 300);
+                        typewriterTimers.push(restartTimer);
+                    }, 3000);
+                    typewriterTimers.push(pauseTimer);
+                }
+            }
 
-// Minutes since midnight, in Africa/Johannesburg, regardless of the
-// device's own timezone/locale settings.
-function nowMinutesSAST(){
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: SLOT_TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false,
-  }).formatToParts(new Date());
-  const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
-  const minute = parseInt(parts.find(p => p.type === 'minute').value, 10);
-  return hour * 60 + minute;
-}
-function slotMinutes(timeStr){
-  const [h, m] = String(timeStr).split(':').map(Number);
-  return (h||0) * 60 + (m||0);
-}
-function hasSlotPassed(timeStr){
-  return slotMinutes(timeStr) <= nowMinutesSAST();
-}
+            const startTimer = setTimeout(() => {
+                intervalId = setInterval(typeChar, 80);
+                typewriterTimers.push(intervalId);
+            }, initialDelay);
+            typewriterTimers.push(startTimer);
+        }
 
-function sanitizeStudentIdInput(inputEl){
-  // Keep only digits and the letters/@ needed to type the suffix, and
-  // uppercase it so "@rsm" becomes "@RSM" as the person types.
-  const cleaned = inputEl.value.toUpperCase().replace(/[^0-9@RSM]/g, '').slice(0, STUDENT_ID_MAXLEN);
-  if (inputEl.value !== cleaned) inputEl.value = cleaned;
-}
-function isValidStudentId(id){ return new RegExp(`^\\d{${STUDENT_ID_DIGITS}}${STUDENT_ID_SUFFIX}$`).test(id); }
+        function startTypewriter() {
+            clearAllTypewriterTimers();
+            const eyebrowEl = document.getElementById('typed-title');
+            const eyebrowCursor = document.getElementById('cursor-typing');
+            const headingEl = document.getElementById('typed-heading');
+            const headingCursor = document.getElementById('cursor-heading');
+            typeInto(eyebrowEl, eyebrowCursor, 'RSM Student Accommodation', 400);
+            typeInto(headingEl, headingCursor, headingEl ? (headingEl.dataset.text || '') : '', 1200);
+        }
 
-function startCountdownIfNeeded(){
-  clearCountdown();
-  const myVote = myVoteFor(activeDirection);
-  if(view==='board' && myVote && isEditable(myVote)){
-    countdownTimer = setInterval(()=>{ render(false); }, 1000);
-  }
-}
-function clearCountdown(){ if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; } }
+        function stopTypewriter() {
+            clearAllTypewriterTimers();
+        }
 
-function startClockTickIfNeeded(){
-  clearClockTick();
-  if(view==='board'){
-    // Re-render once a minute so slots automatically flip to "Passed"
-    // as the clock ticks past their time, without needing a refresh.
-    clockTickTimer = setInterval(()=>{ render(false); }, 60000);
-  }
-}
-function clearClockTick(){ if(clockTickTimer){ clearInterval(clockTickTimer); clockTickTimer=null; } }
+        // ─── API helpers ──────────────────────────────────────────────────────
+        function activeToken() { return role === 'admin' ? adminToken : studentToken; }
 
-function snapshotTaken(){
-  const m = {};
-  slots.forEach(s=>{ m[s.id] = s.taken; });
-  return m;
-}
-function checkSlotOpenings(oldSnap, newSnap){
-  if(!oldSnap) return;
-  slots.forEach(slot=>{
-    const wasFull = (oldSnap[slot.id] ?? 0) >= slot.capacity;
-    const isFullNow = (newSnap[slot.id] ?? 0) >= slot.capacity;
-    if(wasFull && !isFullNow){
-      const myVote = myVoteFor(slot.direction);
-      if(myVote && myVote.slotId !== slot.id){
-        const dirLabel = DIRECTIONS.find(d=>d.id===slot.direction)?.label || slot.direction;
-        showToast(`Seat opened up at ${slot.time} (${dirLabel}) — tap it to switch.`);
-      }
-    }
-  });
-}
-function startPollingIfNeeded(){
-  stopPolling();
-  if(view!=='board') return;
-  lastSnapshot = snapshotTaken();
-  lastSyncedAt = Date.now();
-  pollTimer = setInterval(async ()=>{
-    if(document.getElementById('overlay')) return;
-    try{ await loadBoardData(); }catch(e){ return; }
-    lastSyncedAt = Date.now();
-    const newSnap = snapshotTaken();
-    const changed = new Set();
-    Object.keys(newSnap).forEach(id=>{
-      if(!lastSnapshot || newSnap[id] !== lastSnapshot[id]) changed.add(id);
-    });
-    checkSlotOpenings(lastSnapshot, newSnap);
-    lastSnapshot = newSnap;
-    if(view==='board') render(false, changed);
-  }, 5000);
-  syncTickTimer = setInterval(updateSyncTicker, 1000);
-}
-function stopPolling(){
-  if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
-  if(syncTickTimer){ clearInterval(syncTickTimer); syncTickTimer=null; }
-}
-function updateSyncTicker(){
-  const el = document.getElementById('syncTicker');
-  if(!el) return;
-  const secs = Math.max(0, Math.round((Date.now()-lastSyncedAt)/1000));
-  el.textContent = secs<2 ? 'Live · synced just now' : `Live · synced ${secs}s ago`;
-}
+        async function api(path, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+            const token = activeToken();
+            if (token) headers.Authorization = `Bearer ${token}`;
+            const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+            let body = null;
+            try { body = await res.json(); } catch (e) {}
+            if (!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
+            return body;
+        }
 
-function flapMarkup(str, animate){
-  return `<div class="flap-time">${[...String(str)].map((ch,i)=>{
-    if(ch===':') return `<span class="flap-char colon">:</span>`;
-    const delayAttr = animate ? ` flap-anim" style="animation-delay:${i*45}ms` : '"';
-    return `<span class="flap-char${delayAttr}>${escapeHtml(ch)}</span>`;
-  }).join('')}</div>`;
-}
+        function normalizeVote(v) { return { direction: v.direction, slotId: v.slot_id, ts: Number(v.ts),
+                originalTs: Number(v.original_ts) }; }
 
-function render(animate, changedIds){
-  if(animate===undefined) animate = true;
-  const app = document.getElementById('app');
-  if(view==='gate'){ stopPolling(); clearClockTick(); app.innerHTML = renderGate(); bindGate(); return; }
-  if(view==='admin'){ stopPolling(); clearClockTick(); app.innerHTML = renderAdmin(); bindAdmin(); return; }
-  app.innerHTML = renderBoard(animate, changedIds || new Set()); bindBoard();
-}
+        async function refreshSlots() { slots = await api('/slots'); }
 
-function renderGate(){
-  const mode = gateMode;
-  return `
-    <header>
-      <div class="board-id"><span class="live-dot"></span><span class="eyebrow">RSM Student Accommodation</span></div>
-      <h1>Transport Board</h1>
-      <div class="sub">Log in or create an account to view live seats and book your slot.</div>
-    </header>
-    <main>
-      <div class="gate">
-        <div class="tabs">
-          <div class="tab ${mode==='login'?'active':''}" data-gate-mode="login">Log In</div>
-          <div class="tab ${mode==='signup'?'active':''}" data-gate-mode="signup">Create Account</div>
-        </div>
-        ${mode==='login' ? `
-          <div class="field-label" style="margin-top:16px;">Student Number</div>
-          <input type="text" id="loginId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
-            maxlength="${STUDENT_ID_MAXLEN}">
-          <div class="field-label" style="margin-top:12px;">Password</div>
-          <input type="password" id="loginPw" placeholder="Your password" autocomplete="off">
-          <div style="text-align:right; margin-top:8px;"><span id="forgotPwLink" style="color:var(--amber); font-size:12px; font-weight:600; cursor:pointer;">Forgot password?</span></div>
-          <button class="btn btn-primary" id="loginBtn">Log In</button>
-          <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password.</div>
-        ` : `
-          <div class="field-label" style="margin-top:16px;">Student Number</div>
-          <input type="text" id="suId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
-            maxlength="${STUDENT_ID_MAXLEN}">
-          <div class="field-label" style="margin-top:12px;">Username (your real name)</div>
-          <input type="text" id="suName" placeholder="e.g. Thandi Nkosi" autocomplete="off">
-          <div class="field-label" style="margin-top:16px;">Security Questions <span style="color:var(--text-dimmer); text-transform:none; letter-spacing:0;">(used to reset your password if you forget it — not case sensitive)</span></div>
-          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">What is your mother's name?</div>
-          <input type="text" id="suSecMother" placeholder="e.g. Nomvula" autocomplete="off">
-          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">What primary school did you attend?</div>
-          <input type="text" id="suSecSchool" placeholder="e.g. Riverside Primary" autocomplete="off">
-          <div class="field-label" style="margin-top:12px; text-transform:none; letter-spacing:0; font-size:11px;">When did you complete matric? (year)</div>
-          <input type="text" id="suSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4">
-          <div class="field-label" style="margin-top:12px;">Password</div>
-          <input type="password" id="suPw" placeholder="Choose a password (min 4 characters)" autocomplete="off">
-          <div class="field-label" style="margin-top:12px;">Confirm Password</div>
-          <input type="password" id="suPw2" placeholder="Repeat password" autocomplete="off">
-          <button class="btn btn-primary" id="signupBtn">Create Account</button>
-          <div class="gate-note">This is used so admin and other students can see your real name — not just your number — when a slot's riders are shown. Already registered? Tap "Log In" above.</div>
-        `}
-      </div>
-    </main>
-    <footer>
-      <span class="admin-link" id="adminLink">Admin</span>
-      <div class="dev-credit">Developed by Kgapane Moenzi</div>
-    </footer>
-  `;
-}
-function bindGate(){
-  document.querySelectorAll('[data-gate-mode]').forEach(t=>{
-    t.addEventListener('click', ()=>{ gateMode = t.dataset.gateMode; render(); });
-  });
-  document.getElementById('adminLink').addEventListener('click', openAdminGate);
+        async function refreshMyVotes() {
+            if (role !== 'student') { myVotes = []; return; }
+            const rows = await api('/votes/mine');
+            myVotes = rows.map(normalizeVote);
+        }
 
-  if(gateMode==='login'){
-    const idInp = document.getElementById('loginId');
-    const pwInp = document.getElementById('loginPw');
-    const btn = document.getElementById('loginBtn');
-    idInp.addEventListener('input', ()=> sanitizeStudentIdInput(idInp));
-    document.getElementById('forgotPwLink').addEventListener('click', openForgotPasswordModal);
-    async function doLogin(){
-      const id = idInp.value.trim();
-      const pw = pwInp.value;
-      if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
-      if(!pw){ showToast('Enter your password'); return; }
-      btn.disabled = true; btn.textContent = 'Checking…';
-      try{
-        const data = await api('/auth/login', { method:'POST', body: JSON.stringify({ studentId:id, password:pw }) });
-        studentToken = data.token; role = 'student'; studentId = data.studentId; currentUsername = data.username;
-        await loadBoardData();
-        view = 'board'; render();
-      }catch(err){
-        showToast(err.message);
-      }finally{
-        btn.disabled=false; btn.textContent='Log In';
-      }
-    }
-    btn.addEventListener('click', doLogin);
-    pwInp.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-  } else {
-    const idInp = document.getElementById('suId');
-    const nameInp = document.getElementById('suName');
-    const secMotherInp = document.getElementById('suSecMother');
-    const secSchoolInp = document.getElementById('suSecSchool');
-    const secMatricInp = document.getElementById('suSecMatric');
-    const pwInp = document.getElementById('suPw');
-    const pw2Inp = document.getElementById('suPw2');
-    const btn = document.getElementById('signupBtn');
-    idInp.addEventListener('input', ()=> sanitizeStudentIdInput(idInp));
-    async function doSignup(){
-      const id = idInp.value.trim();
-      const name = nameInp.value.trim();
-      const secMother = secMotherInp.value.trim();
-      const secSchool = secSchoolInp.value.trim();
-      const secMatric = secMatricInp.value.trim();
-      const pw = pwInp.value;
-      const pw2 = pw2Inp.value;
-      if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
-      if(!name){ showToast('Enter a username (your real name)'); return; }
-      if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions — you\'ll need them to reset your password'); return; }
-      if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
-      if(pw!==pw2){ showToast('Passwords do not match'); return; }
-      btn.disabled = true; btn.textContent = 'Creating…';
-      try{
-        const data = await api('/auth/signup', { method:'POST', body: JSON.stringify({
-          studentId:id, username:name, password:pw,
-          securityMother:secMother, securitySchool:secSchool, securityMatric:secMatric
-        }) });
-        studentToken = data.token; role = 'student'; studentId = data.studentId; currentUsername = data.username;
-        await loadBoardData();
-        view = 'board'; render();
-      }catch(err){
-        showToast(err.message);
-      }finally{
-        btn.disabled=false; btn.textContent='Create Account';
-      }
-    }
-    btn.addEventListener('click', doSignup);
-    pw2Inp.addEventListener('keydown', e=>{ if(e.key==='Enter') doSignup(); });
-  }
-}
+        async function refreshMyChangeRequests() {
+            if (role !== 'student') { myChangeRequests = []; return; }
+            myChangeRequests = await api('/change-requests/mine');
+        }
 
-function statusFor(slot){
-  const taken = slot.taken || 0;
-  const remaining = slot.capacity - taken;
-  const myVote = myVoteFor(slot.direction);
-  const mine = (myVote && myVote.slotId === slot.id) ? myVote : null;
-  return { taken, remaining, full: remaining<=0, mine };
-}
+        async function refreshAdminChangeRequests() { adminChangeRequests = await api('/change-requests'); }
 
-function renderBoard(animate, changedIds){
-  changedIds = changedIds || new Set();
-  const dirSlots = slots.filter(s=>s.direction===activeDirection).sort((a,b)=>a.time.localeCompare(b.time));
-  const myVote = myVoteFor(activeDirection);
-  const editable = myVote ? isEditable(myVote) : false;
+        async function refreshVoteHistory() { voteHistory = await api('/history'); }
 
-  let totalTaken = 0, totalCap = 0;
-  dirSlots.forEach(s=>{ totalTaken += (s.taken||0); totalCap += s.capacity; });
-  const fillPct = totalCap ? Math.round((totalTaken/totalCap)*100) : 0;
-  const statsBar = dirSlots.length ? `
-    <div class="stats-bar">
-      <span>${DIRECTIONS.find(d=>d.id===activeDirection).label} full</span>
-      <div class="stats-track"><div class="stats-fill" style="width:${fillPct}%"></div></div>
-      <span class="stats-num">${totalTaken}/${totalCap}</span>
-    </div>` : '';
+        async function refreshRiders(slotId) { ridersCache[slotId] = await api(`/votes/slot/${slotId}`); return ridersCache[
+                slotId]; }
 
-  let rows = '';
-  if(dirSlots.length===0){
-    rows = `<div class="empty">No slots set up for this direction yet.</div>`;
-  } else {
-    rows = dirSlots.map(slot=>{
-      const st = statusFor(slot);
-      const passed = hasSlotPassed(slot.time) && !st.mine;
-      let statusHtml, rowClass='';
-      if(st.mine){
-        statusHtml = editable ? `<span class="tag tag-mine">Yours</span>` : `<span class="tag tag-mine">Locked</span>`;
-        rowClass = 'mine';
-      } else if(st.full){
-        statusHtml = `<span class="tag tag-full">Full</span>`;
-        rowClass = 'full';
-      } else if(passed){
-        statusHtml = `<span class="tag tag-dim">Passed</span>`;
-        rowClass = 'passed';
-      } else if(st.remaining<=3){
-        statusHtml = `<span class="tag tag-low">${st.remaining} left</span>`;
-      } else {
-        statusHtml = `<span class="tag tag-open">Open</span>`;
-      }
-      const clickable = !st.mine && !st.full && !passed;
-      const pct = slot.capacity ? Math.min(100, Math.round((st.taken/slot.capacity)*100)) : 0;
-      const barClass = st.full ? 'full' : (st.remaining<=3 ? 'low' : '');
-      const flashClass = (!animate && changedIds.has(slot.id)) ? ' row-flash' : '';
-      const expanded = expandedBoardSlots.has(slot.id);
-      const riders = ridersCache[slot.id] || [];
-      const ridersHtml = expanded ? `
-        <div class="riders-panel">
-          ${riders.length===0 ? `<div class="riders-empty">No one booked yet.</div>` : riders.map(v=>
-            `<div class="riders-item"><span>${escapeHtml(v.username)}${v.student_id===studentId?' <span class="riders-you">(you)</span>':''}</span><span class="riders-meta">${new Date(Number(v.ts)).toLocaleString()}</span></div>`
-          ).join('')}
-        </div>` : '';
-      return `
-        <div class="slot-wrap">
-          <div class="slot-row ${rowClass}${flashClass}" ${clickable?`data-slot="${slot.id}"`:''}>
-            <div>${flapMarkup(slot.time, animate)}</div>
-            <div>
-              <div class="slot-meta">${st.taken}/${slot.capacity} booked</div>
-              <div class="occupancy"><div class="occupancy-fill ${barClass}" style="width:${pct}%"></div></div>
+        async function loadBoardData() { await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]); }
+
+        async function loadAdminData() { await Promise.all([refreshSlots(), refreshAdminChangeRequests(),
+                refreshVoteHistory()]); }
+
+        function isEditable(vote) { return (Date.now() - vote.originalTs) < CHANGE_WINDOW_MS; }
+
+        function msRemaining(vote) { return Math.max(0, CHANGE_WINDOW_MS - (Date.now() - vote.originalTs)); }
+
+        function myVoteFor(direction) { return myVotes.find(v => v.direction === direction); }
+
+        function fmtRemaining(ms) {
+            const totalSec = Math.ceil(ms / 1000);
+            const mm = Math.floor(totalSec / 60),
+                ss = totalSec % 60;
+            return `${mm}:${ss.toString().padStart(2,'0')}`;
+        }
+
+        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"':
+                    '&quot;', "'": '&#39;' } [c])); }
+
+        function nowMinutesSAST() {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: SLOT_TIMEZONE,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            }).formatToParts(new Date());
+            const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
+            const minute = parseInt(parts.find(p => p.type === 'minute').value, 10);
+            return hour * 60 + minute;
+        }
+
+        function slotMinutes(timeStr) {
+            const [h, m] = String(timeStr).split(':').map(Number);
+            return (h || 0) * 60 + (m || 0);
+        }
+
+        function hasSlotPassed(timeStr) { return slotMinutes(timeStr) <= nowMinutesSAST(); }
+
+        function sanitizeStudentIdInput(inputEl) {
+            const cleaned = inputEl.value.toUpperCase().replace(/[^0-9@RSM]/g, '').slice(0, STUDENT_ID_MAXLEN);
+            if (inputEl.value !== cleaned) inputEl.value = cleaned;
+        }
+
+        function isValidStudentId(id) { return new RegExp(`^\\d{${STUDENT_ID_DIGITS}}${STUDENT_ID_SUFFIX}$`).test(id); }
+
+        function startCountdownIfNeeded() {
+            clearCountdown();
+            const myVote = myVoteFor(activeDirection);
+            if (view === 'board' && myVote && isEditable(myVote)) {
+                countdownTimer = setInterval(() => { render(false); }, 1000);
+            }
+        }
+
+        function clearCountdown() { if (countdownTimer) { clearInterval(countdownTimer);
+                countdownTimer = null; } }
+
+        function startClockTickIfNeeded() {
+            clearClockTick();
+            if (view === 'board') {
+                clockTickTimer = setInterval(() => { render(false); }, 60000);
+            }
+        }
+
+        function clearClockTick() { if (clockTickTimer) { clearInterval(clockTickTimer);
+                clockTickTimer = null; } }
+
+        function snapshotTaken() {
+            const m = {};
+            slots.forEach(s => { m[s.id] = s.taken; });
+            return m;
+        }
+
+        function checkSlotOpenings(oldSnap, newSnap) {
+            if (!oldSnap) return;
+            slots.forEach(slot => {
+                const wasFull = (oldSnap[slot.id] ?? 0) >= slot.capacity;
+                const isFullNow = (newSnap[slot.id] ?? 0) >= slot.capacity;
+                if (wasFull && !isFullNow) {
+                    const myVote = myVoteFor(slot.direction);
+                    if (myVote && myVote.slotId !== slot.id) {
+                        const dirLabel = DIRECTIONS.find(d => d.id === slot.direction)?.label || slot.direction;
+                        showToast(`Seat opened up at ${slot.time} (${dirLabel}) — tap it to switch.`);
+                    }
+                }
+            });
+        }
+
+        function startPollingIfNeeded() {
+            stopPolling();
+            if (view !== 'board') return;
+            lastSnapshot = snapshotTaken();
+            lastSyncedAt = Date.now();
+            pollTimer = setInterval(async () => {
+                if (document.getElementById('overlay')) return;
+                try { await loadBoardData(); } catch (e) { return; }
+                lastSyncedAt = Date.now();
+                const newSnap = snapshotTaken();
+                const changed = new Set();
+                Object.keys(newSnap).forEach(id => {
+                    if (!lastSnapshot || newSnap[id] !== lastSnapshot[id]) changed.add(id);
+                });
+                checkSlotOpenings(lastSnapshot, newSnap);
+                lastSnapshot = newSnap;
+                if (view === 'board') render(false, changed);
+            }, 5000);
+            syncTickTimer = setInterval(updateSyncTicker, 1000);
+        }
+
+        function stopPolling() {
+            if (pollTimer) { clearInterval(pollTimer);
+                pollTimer = null; }
+            if (syncTickTimer) { clearInterval(syncTickTimer);
+                syncTickTimer = null; }
+        }
+
+        function updateSyncTicker() {
+            const el = document.getElementById('syncTicker');
+            if (!el) return;
+            const secs = Math.max(0, Math.round((Date.now() - lastSyncedAt) / 1000));
+            el.textContent = secs < 2 ? 'Live · synced just now' : `Live · synced ${secs}s ago`;
+        }
+
+        function flapMarkup(str, animate) {
+            return `<div class="flap-time">${[...String(str)].map((ch,i)=>{
+        if(ch===':') return `<span class="flap-char colon">:</span>`;
+        const delayAttr = animate ? ` flap-anim" style="animation-delay:${i*45}ms` : '"';
+        return `<span class="flap-char${delayAttr}>${escapeHtml(ch)}</span>`;
+      }).join('')}</div>`;
+        }
+
+        function render(animate, changedIds) {
+            if (animate === undefined) animate = true;
+            const app = document.getElementById('app');
+            if (view === 'gate') { stopPolling();
+                clearClockTick();
+                stopTypewriter();
+                app.innerHTML = renderGate();
+                bindGate();
+                startTypewriter();
+                return; }
+            if (view === 'admin') { stopPolling();
+                clearClockTick();
+                stopTypewriter();
+                app.innerHTML = renderAdmin();
+                bindAdmin();
+                startTypewriter();
+                return; }
+            app.innerHTML = renderBoard(animate, changedIds || new Set());
+            bindBoard();
+            startTypewriter();
+        }
+
+        // ─── Render functions ────────────────────────────────────────────────
+        function renderGate() {
+            const mode = gateMode;
+            return `
+        <header>
+          <div class="board-id"><span class="live-dot"></span><span class="eyebrow" id="typed-title"></span><span class="cursor cursor-eyebrow" id="cursor-typing"></span></div>
+          <div class="title-wrapper">
+            <h1><span id="typed-heading" data-text="Transport Board"></span><span class="cursor" id="cursor-heading"></span></h1>
+          </div>
+          <div class="sub">Log in or create an account to view live seats and book your slot.</div>
+        </header>
+        <main>
+          <div class="gate">
+            <div class="tabs">
+              <div class="tab ${mode==='login'?'active':''}" data-gate-mode="login">Log In</div>
+              <div class="tab ${mode==='signup'?'active':''}" data-gate-mode="signup">Create Account</div>
             </div>
-            <div class="slot-status">${statusHtml}</div>
+            ${mode==='login' ? `
+              <div class="field-label" style="margin-top:18px;">Student Number</div>
+              <input type="text" id="loginId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
+                maxlength="${STUDENT_ID_MAXLEN}">
+              <div class="field-label" style="margin-top:14px;">Password</div>
+              <input type="password" id="loginPw" placeholder="Your password" autocomplete="off">
+              <div style="text-align:right; margin-top:6px;"><span id="forgotPwLink" style="color:var(--neon-cyan); font-size:12px; font-weight:600; cursor:pointer; transition:opacity 0.2s; text-shadow:0 0 8px var(--neon-cyan);">Forgot password?</span></div>
+              <button class="btn btn-primary" id="loginBtn">Log In</button>
+              <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password.</div>
+            ` : `
+              <div class="field-label" style="margin-top:18px;">Student Number</div>
+              <input type="text" id="suId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
+                maxlength="${STUDENT_ID_MAXLEN}">
+              <div class="field-label" style="margin-top:14px;">Username (your real name)</div>
+              <input type="text" id="suName" placeholder="e.g. Thandi Nkosi" autocomplete="off">
+              <div class="field-label" style="margin-top:16px;">Security Questions <span style="color:var(--text-dimmer); text-transform:none; letter-spacing:0; font-weight:400;">(used to reset your password — not case sensitive)</span></div>
+              <div class="field-label" style="margin-top:10px; text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">What is your mother's name?</div>
+              <input type="text" id="suSecMother" placeholder="e.g. Nomvula" autocomplete="off">
+              <div class="field-label" style="margin-top:10px; text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">What primary school did you attend?</div>
+              <input type="text" id="suSecSchool" placeholder="e.g. Riverside Primary" autocomplete="off">
+              <div class="field-label" style="margin-top:10px; text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">When did you complete matric? (year)</div>
+              <input type="text" id="suSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4">
+              <div class="field-label" style="margin-top:14px;">Password</div>
+              <input type="password" id="suPw" placeholder="Choose a password (min 4 characters)" autocomplete="off">
+              <div class="field-label" style="margin-top:10px;">Confirm Password</div>
+              <input type="password" id="suPw2" placeholder="Repeat password" autocomplete="off">
+              <button class="btn btn-primary" id="signupBtn">Create Account</button>
+              <div class="gate-note">This is used so admin and other students can see your real name — not just your number — when a slot's riders are shown. Already registered? Tap "Log In" above.</div>
+            `}
           </div>
-          <button class="riders-toggle" data-riders-toggle="${slot.id}" type="button">${expanded?'Hide':'See'} who's booked${st.taken?` (${st.taken})`:''}</button>
-          ${ridersHtml}
-        </div>`;
-    }).join('');
-  }
-
-  let lockedBanner = '';
-  const myPendingReq = myChangeRequests.find(r=>r.direction===activeDirection && r.status==='pending');
-  const lastReq = myChangeRequests.filter(r=>r.direction===activeDirection).sort((a,b)=>b.ts-a.ts)[0];
-  const removeBtnHtml = `<button class="btn btn-outline-red" data-remove-booking style="padding:9px 12px; font-size:12px;">Remove my booking</button>`;
-
-  if(myVote && myPendingReq){
-    const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
-    lockedBanner = `
-      <div class="locked-banner blue">
-        <div class="banner-icon">Sent</div>
-        <div class="banner-body">
-          You're booked for <b>${bookedTime}</b>. Your change request (with proof) has been sent to admin and is awaiting review.
-          <div class="banner-actions">${removeBtnHtml}</div>
-        </div>
-      </div>`;
-  } else if(myVote && editable){
-    const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
-    lockedBanner = `
-      <div class="locked-banner amber">
-        <div class="banner-icon">${fmtRemaining(msRemaining(myVote))}</div>
-        <div class="banner-body">
-          Booked <b>${bookedTime}</b>. Tap any open slot below to switch — you can do this any time, even after this timer runs out, as long as the new slot's time hasn't passed and it isn't full.
-          <div class="banner-actions">
-            <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Leave without picking a new slot (needs proof)</button>
-            ${removeBtnHtml}
-          </div>
-        </div>
-      </div>`;
-  } else if(myVote && !editable){
-    const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
-    lockedBanner = `
-      <div class="locked-banner">
-        <div class="banner-icon">Booked</div>
-        <div class="banner-body">
-          You're booked for <b>${bookedTime}</b> (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can switch to any open slot below, as long as its time hasn't passed yet — we'll notify you if one opens up.
-          If every remaining slot is full and you need to leave without picking a new one, request a change with proof instead.
-          <div class="banner-actions">
-            <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 12px; font-size:12px;">Request a change (upload proof)</button>
-            ${removeBtnHtml}
-          </div>
-        </div>
-      </div>`;
-  } else if(!myVote && lastReq && lastReq.status==='approved'){
-    lockedBanner = `
-      <div class="locked-banner">
-        <div class="banner-icon">Ok</div>
-        <div class="banner-body">Your previous booking was released after admin review. Pick a new slot below.</div>
-      </div>`;
-  }
-
-  return `
-    <header>
-      <div class="board-id"><span class="live-dot"></span><span class="eyebrow">RSM Student Accommodation</span></div>
-      <h1>Transport Board</h1>
-      <div class="sub">Pick a time slot. Slots close once their time has passed for today.</div>
-      <div class="sync-line"><span class="live-dot"></span><span id="syncTicker">Live · synced just now</span></div>
-    </header>
-    <main>
-      <div class="id-chip">
-        <span><b>${escapeHtml(currentUsername || studentId)}</b> <span style="color:var(--text-dimmer); font-weight:400;">#${escapeHtml(studentId)}</span></span>
-        <button id="switchId">Log Out</button>
-      </div>
-      <div class="tabs">
-        ${DIRECTIONS.map(d=>`<div class="tab ${d.id===activeDirection?'active':''}" data-dir="${d.id}">${d.label}</div>`).join('')}
-      </div>
-      ${statsBar}
-      <div class="board">
-        <div class="board-head"><span>Time</span><span>Booked</span><span>Status</span></div>
-        ${rows}
-      </div>
-      ${lockedBanner}
-    </main>
-    <footer>
-      <span class="admin-link" id="adminLink">Admin</span>
-      <div class="dev-credit">Developed by Kgapane Moenzi</div>
-    </footer>
-  `;
-}
-
-function bindBoard(){
-  document.getElementById('switchId').addEventListener('click', ()=>{
-    clearCountdown(); clearClockTick(); stopPolling();
-    studentToken = null; studentId = ''; currentUsername = ''; role = null; gateMode = 'login';
-    myVotes = []; myChangeRequests = []; ridersCache = {};
-    view='gate'; render();
-  });
-  document.querySelectorAll('.tab').forEach(t=>{
-    t.addEventListener('click', ()=>{ activeDirection = t.dataset.dir; render(); });
-  });
-  document.querySelectorAll('.slot-row[data-slot]').forEach(row=>{
-    row.addEventListener('click', ()=> requestBooking(row.dataset.slot));
-  });
-  document.querySelectorAll('[data-riders-toggle]').forEach(btn=>{
-    btn.addEventListener('click', async (e)=>{
-      e.stopPropagation();
-      const id = btn.dataset.ridersToggle;
-      if(expandedBoardSlots.has(id)){ expandedBoardSlots.delete(id); render(false); }
-      else {
-        expandedBoardSlots.add(id);
-        try{ await refreshRiders(id); }catch(err){ showToast(err.message); }
-        render(false);
-      }
-    });
-  });
-  document.getElementById('adminLink').addEventListener('click', openAdminGate);
-  const reqBtn = document.getElementById('requestChangeBtn');
-  if(reqBtn) reqBtn.addEventListener('click', openChangeRequestModal);
-  const removeBtn = document.querySelector('[data-remove-booking]');
-  if(removeBtn) removeBtn.addEventListener('click', confirmRemoveBooking);
-  startCountdownIfNeeded();
-  startClockTickIfNeeded();
-  startPollingIfNeeded();
-}
-
-function openAdminGate(){
-  showPromptModal('Enter admin password', 'Admin password', async (pw)=>{
-    if(!pw) return;
-    try{
-      const data = await api('/auth/admin-login', { method:'POST', body: JSON.stringify({ password: pw }) });
-      adminToken = data.token; role = 'admin';
-      clearCountdown(); clearClockTick(); stopPolling();
-      await loadAdminData();
-      view='admin'; render();
-    }catch(err){
-      showToast(err.message);
-    }
-  });
-}
-
-function openForgotPasswordModal(){
-  const div = document.createElement('div');
-  div.className='overlay'; div.id='overlay';
-  div.innerHTML = `
-    <div class="modal">
-      <h3>Reset your password</h3>
-      <p>Enter your student number and answer your security questions. Answers aren't case sensitive.</p>
-      <div class="field-label">Student Number</div>
-      <input type="text" id="rpId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
-        maxlength="${STUDENT_ID_MAXLEN}" style="margin-bottom:14px;">
-      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">What is your mother's name?</div>
-      <input type="text" id="rpSecMother" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
-      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">What primary school did you attend?</div>
-      <input type="text" id="rpSecSchool" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
-      <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px;">When did you complete matric? (year)</div>
-      <input type="text" id="rpSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4" style="margin-bottom:14px;">
-      <div class="field-label">New Password</div>
-      <input type="password" id="rpPw" placeholder="Choose a new password (min 4 characters)" autocomplete="off" style="margin-bottom:14px;">
-      <div class="field-label">Confirm New Password</div>
-      <input type="password" id="rpPw2" placeholder="Repeat new password" autocomplete="off" style="margin-bottom:16px;">
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-        <button class="btn btn-primary" id="submitResetBtn" style="margin-top:0;">Reset Password</button>
-      </div>
-    </div>`;
-  document.body.appendChild(div);
-  const idInp = document.getElementById('rpId');
-  idInp.addEventListener('input', ()=> sanitizeStudentIdInput(idInp));
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  document.getElementById('submitResetBtn').addEventListener('click', async ()=>{
-    const id = idInp.value.trim();
-    const secMother = document.getElementById('rpSecMother').value.trim();
-    const secSchool = document.getElementById('rpSecSchool').value.trim();
-    const secMatric = document.getElementById('rpSecMatric').value.trim();
-    const pw = document.getElementById('rpPw').value;
-    const pw2 = document.getElementById('rpPw2').value;
-    if(!isValidStudentId(id)){ showToast('Enter a valid student number'); return; }
-    if(!secMother || !secSchool || !secMatric){ showToast('Answer all three security questions'); return; }
-    if(pw.length<4){ showToast('Password must be at least 4 characters'); return; }
-    if(pw!==pw2){ showToast('Passwords do not match'); return; }
-    const btn = document.getElementById('submitResetBtn');
-    btn.disabled = true; btn.textContent = 'Resetting…';
-    try{
-      await api('/auth/reset-password', { method:'POST', body: JSON.stringify({
-        studentId:id, newPassword:pw,
-        securityMother:secMother, securitySchool:secSchool, securityMatric:secMatric
-      }) });
-      closeModal();
-      showToast('Password reset — you can log in now.');
-    }catch(err){
-      showToast(err.message);
-    }finally{
-      btn.disabled=false; btn.textContent='Reset Password';
-    }
-  });
-}
-
-async function requestBooking(slotId){
-  const slot = slots.find(s=>s.id===slotId);
-  const existing = myVoteFor(activeDirection);
-  const isSwitch = !!existing;
-  const title = isSwitch ? `Switch to the ${slot.time} slot?` : `Book the ${slot.time} slot?`;
-  const body = isSwitch
-    ? `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch again any time, as long as the slot you want isn't full and its time hasn't passed.`
-    : `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch to any other open slot any time — no need to wait.`;
-
-  showModal(title, body, async ()=>{
-    closeModal();
-    try{
-      await api('/votes', { method:'POST', body: JSON.stringify({ direction: activeDirection, slotId }) });
-      await Promise.all([refreshSlots(), refreshMyVotes()]);
-      showToast(`Booked: ${slot.time}`);
-    }catch(err){
-      showToast(err.message);
-    }
-    render();
-  });
-}
-
-function confirmRemoveBooking(){
-  const myVote = myVoteFor(activeDirection);
-  if(!myVote) return;
-  const bookedTime = slots.find(s=>s.id===myVote.slotId)?.time || '';
-  const div = document.createElement('div');
-  div.className='overlay'; div.id='overlay';
-  div.innerHTML = `
-    <div class="modal">
-      <h3>Remove your booking?</h3>
-      <p>This frees up your seat on the <b>${escapeHtml(bookedTime)}</b> slot (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can always book another open slot later.</p>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-        <button class="btn btn-outline-red" id="confirmRemoveBtn" style="margin-top:0;">Remove booking</button>
-      </div>
-    </div>`;
-  document.body.appendChild(div);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  document.getElementById('confirmRemoveBtn').addEventListener('click', async ()=>{
-    closeModal();
-    try{
-      await api(`/votes/mine/${activeDirection}`, { method:'DELETE' });
-      await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]);
-      showToast('Booking removed');
-    }catch(err){
-      showToast(err.message);
-    }
-    render();
-  });
-}
-
-function openChangeRequestModal(){
-  const div = document.createElement('div');
-  div.className='overlay'; div.id='overlay';
-  div.innerHTML = `
-    <div class="modal">
-      <h3>Request a change</h3>
-      <p>Upload proof — e.g. a screenshot of the email or message showing your schedule changed. Admin will review it and, if approved, release your current seat so you can pick a new slot.</p>
-      <div class="field-label">Proof (screenshot)</div>
-      <input type="file" accept="image/*" id="proofFile" style="width:100%;margin:8px 0 14px;color:var(--text);font-size:13px;" />
-      <div class="field-label">Note (optional)</div>
-      <input type="text" id="proofNote" placeholder="e.g. Class moved to 12:00" style="margin-top:8px;margin-bottom:16px;" />
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-        <button class="btn btn-primary" id="submitReqBtn">Send to admin</button>
-      </div>
-    </div>`;
-  document.body.appendChild(div);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  document.getElementById('submitReqBtn').addEventListener('click', submitChangeRequest);
-}
-
-function submitChangeRequest(){
-  const fileInput = document.getElementById('proofFile');
-  const note = document.getElementById('proofNote').value.trim();
-  const file = fileInput.files[0];
-  if(!file){ showToast('Please attach a screenshot first'); return; }
-  if(file.size > 4*1024*1024){ showToast('That image is too large — try a smaller screenshot'); return; }
-  const submitBtn = document.getElementById('submitReqBtn');
-  submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
-  const reader = new FileReader();
-  reader.onload = async () => {
-    const imageDataUrl = reader.result;
-    try{
-      await api('/change-requests', { method:'POST', body: JSON.stringify({ direction: activeDirection, imageDataUrl, note }) });
-      await refreshMyChangeRequests();
-      closeModal();
-      showToast('Request sent — admin will review it.');
-      render();
-    }catch(err){
-      submitBtn.disabled=false; submitBtn.textContent='Send to admin';
-      showToast(err.message);
-    }
-  };
-  reader.onerror = () => { showToast('Could not read that file — try again.'); submitBtn.disabled=false; submitBtn.textContent='Send to admin'; };
-  reader.readAsDataURL(file);
-}
-
-function renderChangeRequestsSection(){
-  const pending = adminChangeRequests.filter(r=>r.status==='pending');
-  if(pending.length===0) return '';
-  const rows = pending.map(r=>{
-    const slot = slots.find(s=>s.id===r.slot_id);
-    const dirLabel = DIRECTIONS.find(d=>d.id===r.direction)?.label || r.direction;
-    return `
-      <div class="cr-card">
-        <div class="cr-head">
-          <div class="cr-meta">
-            <span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span> · ${dirLabel} · currently ${slot ? slot.time : '—'}</span>
-            ${r.note ? `<div class="cr-note">${escapeHtml(r.note)}</div>` : ''}
-          </div>
-          <span class="tag tag-low">Needs review</span>
-        </div>
-        <div class="cr-thumb-wrap">
-          <img class="cr-thumb" src="${r.image_data_url}" data-lightbox="${r.id}" />
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-primary" style="margin-top:0; flex:1; padding:10px;" data-approve="${r.id}">Approve — release seat</button>
-          <button class="btn-danger" data-reject="${r.id}" style="flex:1; border-radius:6px; padding:10px;">Reject</button>
-        </div>
-      </div>`;
-  }).join('');
-  return `<div class="section-title">Change Requests (${pending.length})</div>${rows}`;
-}
-
-function renderVoteHistorySection(){
-  if(voteHistory.length===0){
-    return `<div class="section-title">Voting History (this week)</div><div class="empty">No archived votes yet — this fills in each night at 7pm and resets every Monday.</div>`;
-  }
-  // Group by the calendar day (South Africa time) the vote was archived on.
-  const groups = {};
-  voteHistory.forEach(row=>{
-    const day = new Date(Number(row.archived_at)).toLocaleDateString('en-ZA', { timeZone:'Africa/Johannesburg', weekday:'short', day:'numeric', month:'short' });
-    (groups[day] = groups[day] || []).push(row);
-  });
-  const dayBlocks = Object.entries(groups).map(([day, rows])=>{
-    const dirLabelFor = d => DIRECTIONS.find(x=>x.id===d)?.label || d;
-    const items = rows.map(r=>
-      `<div class="riders-item"><span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span></span><span class="riders-meta">${dirLabelFor(r.direction)} · ${escapeHtml(r.slot_time)}</span></div>`
-    ).join('');
-    return `
-      <div class="admin-slot-block">
-        <div style="padding:10px 0 4px; font-family:var(--mono); font-size:10.5px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase;">${day} · ${rows.length} vote${rows.length===1?'':'s'}</div>
-        <div class="riders-panel admin">${items}</div>
-      </div>`;
-  }).join('');
-  return `<div class="section-title">Voting History (this week · ${voteHistory.length} total)</div>${dayBlocks}`;
-}
-
-function renderAdmin(){
-  const campusSlots = slots.filter(s=>s.direction==='to_campus');
-  const residenceSlots = slots.filter(s=>s.direction==='to_residence');
-  const campusTotal = campusSlots.reduce((sum,s)=>sum+(s.taken||0),0);
-  const residenceTotal = residenceSlots.reduce((sum,s)=>sum+(s.taken||0),0);
-  const campusCap = campusSlots.reduce((sum,s)=>sum+s.capacity,0);
-  const residenceCap = residenceSlots.reduce((sum,s)=>sum+s.capacity,0);
-  const metrics = `
-    <div class="admin-metrics">
-      <div class="metric-card campus">
-        <div class="metric-label"><span class="metric-dot"></span>To Campus</div>
-        <div class="metric-value">${campusTotal}</div>
-        <div class="metric-sub">of ${campusCap} seats booked</div>
-      </div>
-      <div class="metric-card residence">
-        <div class="metric-label"><span class="metric-dot"></span>To Residence</div>
-        <div class="metric-value">${residenceTotal}</div>
-        <div class="metric-sub">of ${residenceCap} seats booked</div>
-      </div>
-    </div>`;
-
-  const groups = DIRECTIONS.map(dir=>{
-    const dirSlots = slots.filter(s=>s.direction===dir.id).sort((a,b)=>a.time.localeCompare(b.time));
-    const rows = dirSlots.map(s=>{
-      const taken = s.taken || 0;
-      const expanded = expandedAdminSlots.has(s.id);
-      const riders = ridersCache[s.id] || [];
-      const ridersHtml = expanded ? `
-        <div class="riders-panel admin">
-          ${riders.length===0 ? `<div class="riders-empty">No one booked yet.</div>` : riders.map(v=>{
-            const locked = !isEditable({ originalTs: Number(v.original_ts) });
-            return `<div class="riders-item"><span>${escapeHtml(v.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(v.student_id)}</span></span><span class="riders-meta">${locked?'Locked':'Editable'} · ${new Date(Number(v.ts)).toLocaleString()}</span></div>`;
-          }).join('')}
-        </div>` : '';
-      return `
-      <div class="admin-slot-block">
-        <div class="admin-row">
-          <input type="text" value="${s.time}" data-field="time" data-id="${s.id}" style="width:70px" />
-          <input type="number" value="${s.capacity}" data-field="capacity" data-id="${s.id}" style="width:60px" min="1" />
-          <span style="flex:1; font-size:11.5px; color:var(--text-dim); font-family:var(--mono);">${taken} booked</span>
-          <button class="btn-danger" data-remove="${s.id}">Remove</button>
-        </div>
-        <button class="riders-toggle" data-admin-riders-toggle="${s.id}" type="button">${expanded?'Hide':'View'} riders${taken?` (${taken})`:''}</button>
-        ${ridersHtml}
-      </div>`;
-    }).join('') || `<div class="empty">No slots yet.</div>`;
-    return `
-      <div class="section-title">${dir.label}</div>
-      ${rows}
-      <div class="admin-add">
-        <input type="text" placeholder="Time e.g. 09:00" id="newTime_${dir.id}">
-        <input type="number" placeholder="Seats" value="${DEFAULT_CAPACITY}" id="newCap_${dir.id}">
-        <button class="btn btn-primary" data-add="${dir.id}">Add</button>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <header>
-      <div class="board-id"><span class="live-dot"></span><span class="eyebrow">Admin</span></div>
-      <h1>Manage Slots</h1>
-      <div class="sub">Edits save immediately and apply to all students.</div>
-    </header>
-    <main>
-      ${metrics}
-      ${renderChangeRequestsSection()}
-      ${groups}
-      ${renderVoteHistorySection()}
-      <div class="section-title">Danger zone</div>
-      <button class="btn btn-danger" id="resetVotes" style="width:100%; padding:12px; border-radius:6px;">Clear all bookings</button>
-    </main>
-    <footer><span class="admin-link" id="backLink">Back to board</span></footer>
-  `;
-}
-function bindAdmin(){
-  document.getElementById('backLink').addEventListener('click', async ()=>{
-    adminToken = null;
-    if(studentToken){
-      role = 'student';
-      try{ await loadBoardData(); }catch(e){}
-      view = 'board';
-    } else {
-      role = null;
-      view = 'gate';
-    }
-    render();
-  });
-  document.querySelectorAll('[data-lightbox]').forEach(img=>{
-    img.addEventListener('click', ()=>{
-      const req = adminChangeRequests.find(r=>r.id===img.dataset.lightbox);
-      if(req) openImageLightbox(req.image_data_url);
-    });
-  });
-  document.querySelectorAll('[data-admin-riders-toggle]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id = btn.dataset.adminRidersToggle;
-      if(expandedAdminSlots.has(id)){ expandedAdminSlots.delete(id); render(); }
-      else {
-        expandedAdminSlots.add(id);
-        try{ await refreshRiders(id); }catch(err){ showToast(err.message); }
-        render();
-      }
-    });
-  });
-  document.querySelectorAll('input[data-field]').forEach(inp=>{
-    inp.addEventListener('change', async ()=>{
-      const id = inp.dataset.id, field = inp.dataset.field;
-      const value = field==='capacity' ? Math.max(1, parseInt(inp.value)||1) : inp.value;
-      try{
-        await api(`/slots/${id}`, { method:'PATCH', body: JSON.stringify({ [field]: value }) });
-        await refreshSlots();
-        showToast('Saved');
-        render();
-      }catch(err){
-        showToast(err.message);
-      }
-    });
-  });
-  document.querySelectorAll('[data-remove]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.dataset.remove;
-      showModal('Remove this slot?', 'Existing bookings for it will remain on record but the slot will disappear from the board.', async ()=>{
-        closeModal();
-        try{
-          await api(`/slots/${id}`, { method:'DELETE' });
-          await refreshSlots();
-        }catch(err){ showToast(err.message); }
-        render();
-      });
-    });
-  });
-  document.querySelectorAll('[data-add]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const dir = btn.dataset.add;
-      const timeInp = document.getElementById(`newTime_${dir}`);
-      const capInp = document.getElementById(`newCap_${dir}`);
-      const time = timeInp.value.trim();
-      if(!time){ showToast('Enter a time first'); return; }
-      const cap = Math.max(1, parseInt(capInp.value)||DEFAULT_CAPACITY);
-      try{
-        await api('/slots', { method:'POST', body: JSON.stringify({ direction:dir, time, capacity:cap }) });
-        await refreshSlots();
-        render();
-      }catch(err){
-        showToast(err.message);
-      }
-    });
-  });
-  document.getElementById('resetVotes').addEventListener('click', ()=>{
-    showModal('Clear all bookings?', 'This clears every student booking across every slot. This cannot be undone.', async ()=>{
-      closeModal();
-      try{
-        await api('/votes', { method:'DELETE' });
-        await refreshSlots();
-        showToast('All bookings cleared');
-      }catch(err){
-        showToast(err.message);
-      }
-      render();
-    });
-  });
-  document.querySelectorAll('[data-approve]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.dataset.approve;
-      const req = adminChangeRequests.find(r=>r.id===id);
-      if(!req) return;
-      const slotTime = slots.find(s=>s.id===req.slot_id)?.time || '';
-      showModal('Approve this change request?', `This releases student ${req.student_id}'s seat on the ${slotTime} slot. They'll be able to pick a new slot next time they open the board.`, async ()=>{
-        closeModal();
-        try{
-          await api(`/change-requests/${id}/approve`, { method:'POST' });
-          await Promise.all([refreshAdminChangeRequests(), refreshSlots()]);
-          showToast('Approved — seat released');
-        }catch(err){
-          showToast(err.message);
+        </main>
+        <footer>
+          <span class="admin-link" id="adminLink">Admin</span>
+          <div class="dev-credit">Developed by Kgapane Moenzi</div>
+        </footer>
+      `;
         }
-        render();
-      });
-    });
-  });
-  document.querySelectorAll('[data-reject]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.dataset.reject;
-      showModal('Reject this request?', 'The student stays booked in their current slot.', async ()=>{
-        closeModal();
-        try{
-          await api(`/change-requests/${id}/reject`, { method:'POST' });
-          await refreshAdminChangeRequests();
-          showToast('Request rejected');
-        }catch(err){
-          showToast(err.message);
+
+        function renderBoard(animate, changedIds) {
+            changedIds = changedIds || new Set();
+            const dirSlots = slots.filter(s => s.direction === activeDirection).sort((a, b) => a.time.localeCompare(b.time));
+            const myVote = myVoteFor(activeDirection);
+            const editable = myVote ? isEditable(myVote) : false;
+
+            let totalTaken = 0,
+                totalCap = 0;
+            dirSlots.forEach(s => { totalTaken += (s.taken || 0);
+                totalCap += s.capacity; });
+            const fillPct = totalCap ? Math.round((totalTaken / totalCap) * 100) : 0;
+            const statsBar = dirSlots.length ? `
+            <div class="stats-bar">
+              <span>${DIRECTIONS.find(d=>d.id===activeDirection).label} full</span>
+              <div class="stats-track"><div class="stats-fill" style="width:${fillPct}%"></div></div>
+              <span class="stats-num">${totalTaken}/${totalCap}</span>
+            </div>` : '';
+
+            let rows = '';
+            if (dirSlots.length === 0) {
+                rows = `<div class="empty">No slots set up for this direction yet.</div>`;
+            } else {
+                rows = dirSlots.map(slot => {
+                    const st = statusFor(slot);
+                    const passed = hasSlotPassed(slot.time) && !st.mine;
+                    let statusHtml, rowClass = '';
+                    if (st.mine) {
+                        statusHtml = editable ? `<span class="tag tag-mine">Yours</span>` :
+                            `<span class="tag tag-mine">Locked</span>`;
+                        rowClass = 'mine';
+                    } else if (st.full) {
+                        statusHtml = `<span class="tag tag-full">Full</span>`;
+                        rowClass = 'full';
+                    } else if (passed) {
+                        statusHtml = `<span class="tag tag-dim">Passed</span>`;
+                        rowClass = 'passed';
+                    } else if (st.remaining <= 3) {
+                        statusHtml = `<span class="tag tag-low">${st.remaining} left</span>`;
+                    } else {
+                        statusHtml = `<span class="tag tag-open">Open</span>`;
+                    }
+                    const clickable = !st.mine && !st.full && !passed;
+                    const pct = slot.capacity ? Math.min(100, Math.round((st.taken / slot.capacity) * 100)) : 0;
+                    const barClass = st.full ? 'full' : (st.remaining <= 3 ? 'low' : '');
+                    const flashClass = (!animate && changedIds.has(slot.id)) ? ' row-flash' : '';
+                    const expanded = expandedBoardSlots.has(slot.id);
+                    const riders = ridersCache[slot.id] || [];
+                    const ridersHtml = expanded ? `
+                <div class="riders-panel">
+                  ${riders.length===0 ? `<div class="riders-empty">No one booked yet.</div>` : riders.map(v=>
+                    `<div class="riders-item"><span>${escapeHtml(v.username)}${v.student_id===studentId?' <span class="riders-you">(you)</span>':''}</span><span class="riders-meta">${new Date(Number(v.ts)).toLocaleString()}</span></div>`
+                  ).join('')}
+                </div>` : '';
+                    return `
+                <div class="slot-wrap">
+                  <div class="slot-row ${rowClass}${flashClass}" ${clickable?`data-slot="${slot.id}"`:''}>
+                    <div>${flapMarkup(slot.time, animate)}</div>
+                    <div>
+                      <div class="slot-meta">${st.taken}/${slot.capacity} booked</div>
+                      <div class="occupancy"><div class="occupancy-fill ${barClass}" style="width:${pct}%"></div></div>
+                    </div>
+                    <div class="slot-status">${statusHtml}</div>
+                  </div>
+                  <button class="riders-toggle" data-riders-toggle="${slot.id}" type="button">${expanded?'Hide':'See'} who's booked${st.taken?` (${st.taken})`:''}</button>
+                  ${ridersHtml}
+                </div>`;
+                }).join('');
+            }
+
+            let lockedBanner = '';
+            const myPendingReq = myChangeRequests.find(r => r.direction === activeDirection && r.status === 'pending');
+            const lastReq = myChangeRequests.filter(r => r.direction === activeDirection).sort((a, b) => b.ts - a.ts)[0];
+            const removeBtnHtml =
+                `<button class="btn btn-outline-red" data-remove-booking style="padding:9px 14px; font-size:12px; width:auto;">Remove my booking</button>`;
+
+            if (myVote && myPendingReq) {
+                const bookedTime = slots.find(s => s.id === myVote.slotId)?.time || '';
+                lockedBanner = `
+              <div class="locked-banner blue">
+                <div class="banner-icon">Sent</div>
+                <div class="banner-body">
+                  You're booked for <b>${bookedTime}</b>. Your change request (with proof) has been sent to admin and is awaiting review.
+                  <div class="banner-actions">${removeBtnHtml}</div>
+                </div>
+              </div>`;
+            } else if (myVote && editable) {
+                const bookedTime = slots.find(s => s.id === myVote.slotId)?.time || '';
+                lockedBanner = `
+              <div class="locked-banner amber">
+                <div class="banner-icon">${fmtRemaining(msRemaining(myVote))}</div>
+                <div class="banner-body">
+                  Booked <b>${bookedTime}</b>. Tap any open slot below to switch — you can do this any time, even after this timer runs out, as long as the new slot's time hasn't passed and it isn't full.
+                  <div class="banner-actions">
+                    <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 14px; font-size:12px; width:auto;">Leave without picking a new slot (needs proof)</button>
+                    ${removeBtnHtml}
+                  </div>
+                </div>
+              </div>`;
+            } else if (myVote && !editable) {
+                const bookedTime = slots.find(s => s.id === myVote.slotId)?.time || '';
+                lockedBanner = `
+              <div class="locked-banner">
+                <div class="banner-icon">Booked</div>
+                <div class="banner-body">
+                  You're booked for <b>${bookedTime}</b> (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can switch to any open slot below, as long as its time hasn't passed yet — we'll notify you if one opens up.
+                  If every remaining slot is full and you need to leave without picking a new one, request a change with proof instead.
+                  <div class="banner-actions">
+                    <button class="btn btn-ghost" id="requestChangeBtn" style="padding:9px 14px; font-size:12px; width:auto;">Request a change (upload proof)</button>
+                    ${removeBtnHtml}
+                  </div>
+                </div>
+              </div>`;
+            } else if (!myVote && lastReq && lastReq.status === 'approved') {
+                lockedBanner = `
+              <div class="locked-banner">
+                <div class="banner-icon">Ok</div>
+                <div class="banner-body">Your previous booking was released after admin review. Pick a new slot below.</div>
+              </div>`;
+            }
+
+            return `
+            <header>
+              <div class="board-id"><span class="live-dot"></span><span class="eyebrow" id="typed-title"></span><span class="cursor cursor-eyebrow" id="cursor-typing"></span></div>
+              <div class="title-wrapper">
+                <h1><span id="typed-heading" data-text="Transport Board"></span><span class="cursor" id="cursor-heading"></span></h1>
+              </div>
+              <div class="sub">Pick a time slot. Slots close once their time has passed for today.</div>
+              <div class="sync-line"><span class="live-dot"></span><span id="syncTicker">Live · synced just now</span></div>
+            </header>
+            <main>
+              <div class="id-chip">
+                <span><b>${escapeHtml(currentUsername || studentId)}</b> <span style="color:var(--text-dimmer); font-weight:400;">#${escapeHtml(studentId)}</span></span>
+                <button id="switchId">Log Out</button>
+              </div>
+              <div class="tabs">
+                ${DIRECTIONS.map(d=>`<div class="tab ${d.id===activeDirection?'active':''}" data-dir="${d.id}">${d.label}</div>`).join('')}
+              </div>
+              ${statsBar}
+              <div class="board">
+                <div class="board-head"><span>Time</span><span>Booked</span><span>Status</span></div>
+                ${rows}
+              </div>
+              ${lockedBanner}
+            </main>
+            <footer>
+              <span class="admin-link" id="adminLink">Admin</span>
+              <div class="dev-credit">Developed by Kgapane Moenzi</div>
+            </footer>
+          `;
         }
-        render();
-      });
-    });
-  });
-}
 
-function openImageLightbox(url){
-  const div = document.createElement('div');
-  div.className='lightbox-overlay';
-  div.innerHTML = `<img src="${url}" />`;
-  div.addEventListener('click', ()=> div.remove());
-  document.body.appendChild(div);
-}
+        function renderAdmin() {
+            const campusSlots = slots.filter(s => s.direction === 'to_campus');
+            const residenceSlots = slots.filter(s => s.direction === 'to_residence');
+            const campusTotal = campusSlots.reduce((sum, s) => sum + (s.taken || 0), 0);
+            const residenceTotal = residenceSlots.reduce((sum, s) => sum + (s.taken || 0), 0);
+            const campusCap = campusSlots.reduce((sum, s) => sum + s.capacity, 0);
+            const residenceCap = residenceSlots.reduce((sum, s) => sum + s.capacity, 0);
+            const metrics = `
+            <div class="admin-metrics">
+              <div class="metric-card campus">
+                <div class="metric-label"><span class="metric-dot"></span>To Campus</div>
+                <div class="metric-value">${campusTotal}</div>
+                <div class="metric-sub">of ${campusCap} seats booked</div>
+              </div>
+              <div class="metric-card residence">
+                <div class="metric-label"><span class="metric-dot"></span>To Residence</div>
+                <div class="metric-value">${residenceTotal}</div>
+                <div class="metric-sub">of ${residenceCap} seats booked</div>
+              </div>
+            </div>`;
 
-function showModal(title, body, onConfirm){
-  const div = document.createElement('div');
-  div.className='overlay';
-  div.id='overlay';
-  div.innerHTML = `
-    <div class="modal">
-      <h3>${title}</h3>
-      <p>${body}</p>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-        <button class="btn btn-primary" id="confirmBtn">Confirm booking</button>
-      </div>
-    </div>`;
-  document.body.appendChild(div);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  document.getElementById('confirmBtn').addEventListener('click', onConfirm);
-}
-function closeModal(){ const o=document.getElementById('overlay'); if(o) o.remove(); }
+            const groups = DIRECTIONS.map(dir => {
+                const dirSlots = slots.filter(s => s.direction === dir.id).sort((a, b) => a.time.localeCompare(b
+                .time));
+                const rows = dirSlots.map(s => {
+                    const taken = s.taken || 0;
+                    const expanded = expandedAdminSlots.has(s.id);
+                    const riders = ridersCache[s.id] || [];
+                    const ridersHtml = expanded ? `
+                  <div class="riders-panel admin">
+                    ${riders.length===0 ? `<div class="riders-empty">No one booked yet.</div>` : riders.map(v=>{
+                      const locked = !isEditable({ originalTs: Number(v.original_ts) });
+                      return `<div class="riders-item"><span>${escapeHtml(v.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(v.student_id)}</span></span><span class="riders-meta">${locked?'Locked':'Editable'} · ${new Date(Number(v.ts)).toLocaleString()}</span></div>`;
+                    }).join('')}
+                  </div>` : '';
+                    return `
+                <div class="admin-slot-block">
+                  <div class="admin-row">
+                    <input type="text" value="${s.time}" data-field="time" data-id="${s.id}" style="width:72px" />
+                    <input type="number" value="${s.capacity}" data-field="capacity" data-id="${s.id}" style="width:62px" min="1" />
+                    <span style="flex:1; font-size:11px; color:var(--text-dim); font-family:var(--sans);">${taken} booked</span>
+                    <button class="btn-danger" data-remove="${s.id}">Remove</button>
+                  </div>
+                  <button class="riders-toggle" data-admin-riders-toggle="${s.id}" type="button">${expanded?'Hide':'View'} riders${taken?` (${taken})`:''}</button>
+                  ${ridersHtml}
+                </div>`;
+                }).join('') || `<div class="empty">No slots yet.</div>`;
+                return `
+              <div class="section-title">${dir.label}</div>
+              ${rows}
+              <div class="admin-add">
+                <input type="text" placeholder="Time e.g. 09:00" id="newTime_${dir.id}">
+                <input type="number" placeholder="Seats" value="${DEFAULT_CAPACITY}" id="newCap_${dir.id}">
+                <button class="btn btn-primary" data-add="${dir.id}">Add</button>
+              </div>
+            `;
+            }).join('');
 
-function showPromptModal(title, placeholder, onSubmit){
-  const div = document.createElement('div');
-  div.className='overlay'; div.id='overlay';
-  div.innerHTML = `
-    <div class="modal">
-      <h3>${title}</h3>
-      <input type="password" id="promptInput" placeholder="${placeholder}"
-        style="width:100%;padding:12px;font-size:16px;border-radius:6px;border:1px solid var(--line);
-        background:var(--panel);color:var(--text);margin-bottom:16px;font-family:var(--sans);" />
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-        <button class="btn btn-primary" id="submitBtn">Submit</button>
-      </div>
-    </div>`;
-  document.body.appendChild(div);
-  const inp = document.getElementById('promptInput');
-  setTimeout(()=>inp.focus(), 50);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  document.getElementById('submitBtn').addEventListener('click', submit);
-  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
-  function submit(){ const val=inp.value; closeModal(); onSubmit(val); }
-}
+            return `
+            <header>
+              <div class="board-id"><span class="live-dot"></span><span class="eyebrow" id="typed-title"></span><span class="cursor cursor-eyebrow" id="cursor-typing"></span></div>
+              <div class="title-wrapper">
+                <h1><span id="typed-heading" data-text="Admin"></span><span class="cursor" id="cursor-heading"></span></h1>
+              </div>
+              <div class="sub">Manage Slots &amp; Change Requests</div>
+              <div class="terminal-line">
+                <span class="prompt">$</span>
+                <span class="cmd-text">sudo ./manage-slots</span>
+                <span class="terminal-cursor"></span>
+              </div>
+            </header>
+            <main>
+              ${metrics}
+              ${renderChangeRequestsSection()}
+              ${groups}
+              ${renderVoteHistorySection()}
+              <div class="section-title">Danger zone</div>
+              <button class="btn btn-danger" id="resetVotes" style="width:100%; padding:12px; border-radius:var(--radius-sm);">Clear all bookings</button>
+            </main>
+            <footer><span class="admin-link" id="backLink">Back to board</span></footer>
+          `;
+        }
 
-function showToast(msg){
-  const t = document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2600);
-}
+        // ─── Helper functions for render ──────────────────────────────────────
+        function statusFor(slot) {
+            const taken = slot.taken || 0;
+            const remaining = slot.capacity - taken;
+            const myVote = myVoteFor(slot.direction);
+            const mine = (myVote && myVote.slotId === slot.id) ? myVote : null;
+            return { taken, remaining, full: remaining <= 0, mine };
+        }
 
-(function init(){
-  render();
-})();
-</script>
+        function renderChangeRequestsSection() {
+            const pending = adminChangeRequests.filter(r => r.status === 'pending');
+            if (pending.length === 0) return '';
+            const rows = pending.map(r => {
+                const slot = slots.find(s => s.id === r.slot_id);
+                const dirLabel = DIRECTIONS.find(d => d.id === r.direction)?.label || r.direction;
+                return `
+              <div class="cr-card">
+                <div class="cr-head">
+                  <div class="cr-meta">
+                    <span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span> · ${dirLabel} · currently ${slot ? slot.time : '—'}</span>
+                    ${r.note ? `<div class="cr-note">${escapeHtml(r.note)}</div>` : ''}
+                  </div>
+                  <span class="tag tag-low">Needs review</span>
+                </div>
+                <div class="cr-thumb-wrap">
+                  <img class="cr-thumb" src="${r.image_data_url}" data-lightbox="${r.id}" />
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-primary" style="margin-top:0; flex:1; padding:10px;" data-approve="${r.id}">Approve — release seat</button>
+                  <button class="btn-danger" data-reject="${r.id}" style="flex:1; border-radius:var(--radius-sm); padding:10px;">Reject</button>
+                </div>
+              </div>`;
+            }).join('');
+            return `<div class="section-title">Change Requests (${pending.length})</div>${rows}`;
+        }
+
+        function renderVoteHistorySection() {
+            if (voteHistory.length === 0) {
+                return `<div class="section-title">Voting History (this week)</div><div class="empty">No archived votes yet — this fills in each night at 7pm and resets every Monday.</div>`;
+            }
+            const groups = {};
+            voteHistory.forEach(row => {
+                const day = new Date(Number(row.archived_at)).toLocaleDateString('en-ZA', { timeZone: 'Africa/Johannesburg',
+                    weekday: 'short', day: 'numeric', month: 'short' });
+                (groups[day] = groups[day] || []).push(row);
+            });
+            const dayBlocks = Object.entries(groups).map(([day, rows]) => {
+                const dirLabelFor = d => DIRECTIONS.find(x => x.id === d)?.label || d;
+                const items = rows.map(r =>
+                    `<div class="riders-item"><span>${escapeHtml(r.username)} <span style="color:var(--text-dimmer);">#${escapeHtml(r.student_id)}</span></span><span class="riders-meta">${dirLabelFor(r.direction)} · ${escapeHtml(r.slot_time)}</span></div>`
+                ).join('');
+                return `
+              <div class="admin-slot-block">
+                <div style="padding:10px 0 4px; font-family:var(--sans); font-size:10px; color:var(--text-dim); letter-spacing:1.2px; text-transform:uppercase; font-weight:600;">${day} · ${rows.length} vote${rows.length===1?'':'s'}</div>
+                <div class="riders-panel admin">${items}</div>
+              </div>`;
+            }).join('');
+            return `<div class="section-title">Voting History (this week · ${voteHistory.length} total)</div>${dayBlocks}`;
+        }
+
+        // ─── Bind functions ───────────────────────────────────────────────────
+        function bindGate() {
+            document.querySelectorAll('[data-gate-mode]').forEach(t => {
+                t.addEventListener('click', () => { gateMode = t.dataset.gateMode;
+                    render(); });
+            });
+            document.getElementById('adminLink').addEventListener('click', openAdminGate);
+
+            if (gateMode === 'login') {
+                const idInp = document.getElementById('loginId');
+                const pwInp = document.getElementById('loginPw');
+                const btn = document.getElementById('loginBtn');
+                idInp.addEventListener('input', () => sanitizeStudentIdInput(idInp));
+                document.getElementById('forgotPwLink').addEventListener('click', openForgotPasswordModal);
+
+                async function doLogin() {
+                    const id = idInp.value.trim();
+                    const pw = pwInp.value;
+                    if (!isValidStudentId(id)) { showToast('Enter a valid student number'); return; }
+                    if (!pw) { showToast('Enter your password'); return; }
+                    btn.disabled = true;
+                    btn.textContent = 'Checking…';
+                    try {
+                        const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ studentId: id,
+                                password: pw }) });
+                        studentToken = data.token;
+                        role = 'student';
+                        studentId = data.studentId;
+                        currentUsername = data.username;
+                        await loadBoardData();
+                        view = 'board';
+                        render();
+                    } catch (err) { showToast(err.message); } finally { btn.disabled = false;
+                        btn.textContent = 'Log In'; }
+                }
+                btn.addEventListener('click', doLogin);
+                pwInp.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+            } else {
+                const idInp = document.getElementById('suId');
+                const nameInp = document.getElementById('suName');
+                const secMotherInp = document.getElementById('suSecMother');
+                const secSchoolInp = document.getElementById('suSecSchool');
+                const secMatricInp = document.getElementById('suSecMatric');
+                const pwInp = document.getElementById('suPw');
+                const pw2Inp = document.getElementById('suPw2');
+                const btn = document.getElementById('signupBtn');
+                idInp.addEventListener('input', () => sanitizeStudentIdInput(idInp));
+
+                async function doSignup() {
+                    const id = idInp.value.trim();
+                    const name = nameInp.value.trim();
+                    const secMother = secMotherInp.value.trim();
+                    const secSchool = secSchoolInp.value.trim();
+                    const secMatric = secMatricInp.value.trim();
+                    const pw = pwInp.value;
+                    const pw2 = pw2Inp.value;
+                    if (!isValidStudentId(id)) { showToast('Enter a valid student number'); return; }
+                    if (!name) { showToast('Enter a username (your real name)'); return; }
+                    if (!secMother || !secSchool || !secMatric) { showToast(
+                            'Answer all three security questions — you\'ll need them to reset your password'); return; }
+                    if (pw.length < 4) { showToast('Password must be at least 4 characters'); return; }
+                    if (pw !== pw2) { showToast('Passwords do not match'); return; }
+                    btn.disabled = true;
+                    btn.textContent = 'Creating…';
+                    try {
+                        const data = await api('/auth/signup', { method: 'POST', body: JSON.stringify({
+                                studentId: id,
+                                username: name,
+                                password: pw,
+                                securityMother: secMother,
+                                securitySchool: secSchool,
+                                securityMatric: secMatric
+                            }) });
+                        studentToken = data.token;
+                        role = 'student';
+                        studentId = data.studentId;
+                        currentUsername = data.username;
+                        await loadBoardData();
+                        view = 'board';
+                        render();
+                    } catch (err) { showToast(err.message); } finally { btn.disabled = false;
+                        btn.textContent = 'Create Account'; }
+                }
+                btn.addEventListener('click', doSignup);
+                pw2Inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
+            }
+        }
+
+        function bindBoard() {
+            document.getElementById('switchId').addEventListener('click', () => {
+                clearCountdown();
+                clearClockTick();
+                stopPolling();
+                studentToken = null;
+                studentId = '';
+                currentUsername = '';
+                role = null;
+                gateMode = 'login';
+                myVotes = [];
+                myChangeRequests = [];
+                ridersCache = {};
+                view = 'gate';
+                render();
+            });
+            document.querySelectorAll('.tab').forEach(t => {
+                t.addEventListener('click', () => { activeDirection = t.dataset.dir;
+                    render(); });
+            });
+            document.querySelectorAll('.slot-row[data-slot]').forEach(row => {
+                row.addEventListener('click', () => requestBooking(row.dataset.slot));
+            });
+            document.querySelectorAll('[data-riders-toggle]').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.ridersToggle;
+                    if (expandedBoardSlots.has(id)) { expandedBoardSlots.delete(id);
+                        render(false); } else {
+                        expandedBoardSlots.add(id);
+                        try { await refreshRiders(id); } catch (err) { showToast(err.message); }
+                        render(false);
+                    }
+                });
+            });
+            document.getElementById('adminLink').addEventListener('click', openAdminGate);
+            const reqBtn = document.getElementById('requestChangeBtn');
+            if (reqBtn) reqBtn.addEventListener('click', openChangeRequestModal);
+            const removeBtn = document.querySelector('[data-remove-booking]');
+            if (removeBtn) removeBtn.addEventListener('click', confirmRemoveBooking);
+            startCountdownIfNeeded();
+            startClockTickIfNeeded();
+            startPollingIfNeeded();
+        }
+
+        function bindAdmin() {
+            document.getElementById('backLink').addEventListener('click', async () => {
+                adminToken = null;
+                if (studentToken) {
+                    role = 'student';
+                    try { await loadBoardData(); } catch (e) {}
+                    view = 'board';
+                } else {
+                    role = null;
+                    view = 'gate';
+                }
+                render();
+            });
+            document.querySelectorAll('[data-lightbox]').forEach(img => {
+                img.addEventListener('click', () => {
+                    const req = adminChangeRequests.find(r => r.id === img.dataset.lightbox);
+                    if (req) openImageLightbox(req.image_data_url);
+                });
+            });
+            document.querySelectorAll('[data-admin-riders-toggle]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.adminRidersToggle;
+                    if (expandedAdminSlots.has(id)) { expandedAdminSlots.delete(id);
+                        render(); } else {
+                        expandedAdminSlots.add(id);
+                        try { await refreshRiders(id); } catch (err) { showToast(err.message); }
+                        render();
+                    }
+                });
+            });
+            document.querySelectorAll('input[data-field]').forEach(inp => {
+                inp.addEventListener('change', async () => {
+                    const id = inp.dataset.id,
+                        field = inp.dataset.field;
+                    const value = field === 'capacity' ? Math.max(1, parseInt(inp.value) || 1) : inp.value;
+                    try {
+                        await api(`/slots/${id}`, { method: 'PATCH', body: JSON.stringify({ [field]: value }) });
+                        await refreshSlots();
+                        showToast('Saved');
+                        render();
+                    } catch (err) { showToast(err.message); }
+                });
+            });
+            document.querySelectorAll('[data-remove]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.remove;
+                    showModal('Remove this slot?',
+                        'Existing bookings for it will remain on record but the slot will disappear from the board.',
+                        async () => {
+                            closeModal();
+                            try {
+                                await api(`/slots/${id}`, { method: 'DELETE' });
+                                await refreshSlots();
+                            } catch (err) { showToast(err.message); }
+                            render();
+                        });
+                });
+            });
+            document.querySelectorAll('[data-add]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const dir = btn.dataset.add;
+                    const timeInp = document.getElementById(`newTime_${dir}`);
+                    const capInp = document.getElementById(`newCap_${dir}`);
+                    const time = timeInp.value.trim();
+                    if (!time) { showToast('Enter a time first'); return; }
+                    const cap = Math.max(1, parseInt(capInp.value) || DEFAULT_CAPACITY);
+                    try {
+                        await api('/slots', { method: 'POST', body: JSON.stringify({ direction: dir,
+                                time, capacity: cap }) });
+                        await refreshSlots();
+                        render();
+                    } catch (err) { showToast(err.message); }
+                });
+            });
+            document.getElementById('resetVotes').addEventListener('click', () => {
+                showModal('Clear all bookings?', 'This clears every student booking across every slot. This cannot be undone.',
+                    async () => {
+                        closeModal();
+                        try {
+                            await api('/votes', { method: 'DELETE' });
+                            await refreshSlots();
+                            showToast('All bookings cleared');
+                        } catch (err) { showToast(err.message); }
+                        render();
+                    });
+            });
+            document.querySelectorAll('[data-approve]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.approve;
+                    const req = adminChangeRequests.find(r => r.id === id);
+                    if (!req) return;
+                    const slotTime = slots.find(s => s.id === req.slot_id)?.time || '';
+                    showModal('Approve this change request?',
+                        `This releases student ${req.student_id}'s seat on the ${slotTime} slot. They'll be able to pick a new slot next time they open the board.`,
+                        async () => {
+                            closeModal();
+                            try {
+                                await api(`/change-requests/${id}/approve`, { method: 'POST' });
+                                await Promise.all([refreshAdminChangeRequests(), refreshSlots()]);
+                                showToast('Approved — seat released');
+                            } catch (err) { showToast(err.message); }
+                            render();
+                        });
+                });
+            });
+            document.querySelectorAll('[data-reject]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.reject;
+                    showModal('Reject this request?', 'The student stays booked in their current slot.',
+                        async () => {
+                            closeModal();
+                            try {
+                                await api(`/change-requests/${id}/reject`, { method: 'POST' });
+                                await refreshAdminChangeRequests();
+                                showToast('Request rejected');
+                            } catch (err) { showToast(err.message); }
+                            render();
+                        });
+                });
+            });
+        }
+
+        // ─── Modal / Toast / Lightbox ────────────────────────────────────────
+        function openAdminGate() {
+            showPromptModal('Enter admin password', 'Admin password', async (pw) => {
+                if (!pw) return;
+                try {
+                    const data = await api('/auth/admin-login', { method: 'POST', body: JSON.stringify({ password: pw }) });
+                    adminToken = data.token;
+                    role = 'admin';
+                    clearCountdown();
+                    clearClockTick();
+                    stopPolling();
+                    await loadAdminData();
+                    view = 'admin';
+                    render();
+                } catch (err) { showToast(err.message); }
+            });
+        }
+
+        function openForgotPasswordModal() {
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>Reset your password</h3>
+              <p>Enter your student number and answer your security questions. Answers aren't case sensitive.</p>
+              <div class="field-label">Student Number</div>
+              <input type="text" id="rpId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
+                maxlength="${STUDENT_ID_MAXLEN}" style="margin-bottom:14px;">
+              <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">What is your mother's name?</div>
+              <input type="text" id="rpSecMother" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
+              <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">What primary school did you attend?</div>
+              <input type="text" id="rpSecSchool" placeholder="Your answer" autocomplete="off" style="margin-bottom:14px;">
+              <div class="field-label" style="text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">When did you complete matric? (year)</div>
+              <input type="text" id="rpSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4" style="margin-bottom:14px;">
+              <div class="field-label">New Password</div>
+              <input type="password" id="rpPw" placeholder="Choose a new password (min 4 characters)" autocomplete="off" style="margin-bottom:14px;">
+              <div class="field-label">Confirm New Password</div>
+              <input type="password" id="rpPw2" placeholder="Repeat new password" autocomplete="off" style="margin-bottom:16px;">
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitResetBtn" style="margin-top:0;">Reset Password</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            const idInp = document.getElementById('rpId');
+            idInp.addEventListener('input', () => sanitizeStudentIdInput(idInp));
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('submitResetBtn').addEventListener('click', async () => {
+                const id = idInp.value.trim();
+                const secMother = document.getElementById('rpSecMother').value.trim();
+                const secSchool = document.getElementById('rpSecSchool').value.trim();
+                const secMatric = document.getElementById('rpSecMatric').value.trim();
+                const pw = document.getElementById('rpPw').value;
+                const pw2 = document.getElementById('rpPw2').value;
+                if (!isValidStudentId(id)) { showToast('Enter a valid student number'); return; }
+                if (!secMother || !secSchool || !secMatric) { showToast('Answer all three security questions'); return; }
+                if (pw.length < 4) { showToast('Password must be at least 4 characters'); return; }
+                if (pw !== pw2) { showToast('Passwords do not match'); return; }
+                const btn = document.getElementById('submitResetBtn');
+                btn.disabled = true;
+                btn.textContent = 'Resetting…';
+                try {
+                    await api('/auth/reset-password', { method: 'POST', body: JSON.stringify({
+                            studentId: id,
+                            newPassword: pw,
+                            securityMother: secMother,
+                            securitySchool: secSchool,
+                            securityMatric: secMatric
+                        }) });
+                    closeModal();
+                    showToast('Password reset — you can log in now.');
+                } catch (err) { showToast(err.message); } finally { btn.disabled = false;
+                    btn.textContent = 'Reset Password'; }
+            });
+        }
+
+        async function requestBooking(slotId) {
+            const slot = slots.find(s => s.id === slotId);
+            const existing = myVoteFor(activeDirection);
+            const isSwitch = !!existing;
+            const title = isSwitch ? `Switch to the ${slot.time} slot?` : `Book the ${slot.time} slot?`;
+            const body = isSwitch ?
+                `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch again any time, as long as the slot you want isn't full and its time hasn't passed.` :
+                `${DIRECTIONS.find(d=>d.id===activeDirection).label} · You can switch to any other open slot any time — no need to wait.`;
+
+            showModal(title, body, async () => {
+                closeModal();
+                try {
+                    await api('/votes', { method: 'POST', body: JSON.stringify({ direction: activeDirection,
+                            slotId }) });
+                    await Promise.all([refreshSlots(), refreshMyVotes()]);
+                    showToast(`Booked: ${slot.time}`);
+                } catch (err) { showToast(err.message); }
+                render();
+            });
+        }
+
+        function confirmRemoveBooking() {
+            const myVote = myVoteFor(activeDirection);
+            if (!myVote) return;
+            const bookedTime = slots.find(s => s.id === myVote.slotId)?.time || '';
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>Remove your booking?</h3>
+              <p>This frees up your seat on the <b>${escapeHtml(bookedTime)}</b> slot (${DIRECTIONS.find(d=>d.id===activeDirection).label}). You can always book another open slot later.</p>
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-outline-red" id="confirmRemoveBtn" style="margin-top:0;">Remove booking</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('confirmRemoveBtn').addEventListener('click', async () => {
+                closeModal();
+                try {
+                    await api(`/votes/mine/${activeDirection}`, { method: 'DELETE' });
+                    await Promise.all([refreshSlots(), refreshMyVotes(), refreshMyChangeRequests()]);
+                    showToast('Booking removed');
+                } catch (err) { showToast(err.message); }
+                render();
+            });
+        }
+
+        function openChangeRequestModal() {
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>Request a change</h3>
+              <p>Upload proof — e.g. a screenshot of the email or message showing your schedule changed. Admin will review it and, if approved, release your current seat so you can pick a new slot.</p>
+              <div class="field-label" style="margin-top:6px;">Proof (screenshot)</div>
+              <input type="file" accept="image/*" id="proofFile" style="width:100%;margin:6px 0 14px;color:var(--text);font-size:13px;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px;" />
+              <div class="field-label">Note (optional)</div>
+              <input type="text" id="proofNote" placeholder="e.g. Class moved to 12:00" style="margin-top:6px;margin-bottom:16px;" />
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitReqBtn">Send to admin</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('submitReqBtn').addEventListener('click', submitChangeRequest);
+        }
+
+        function submitChangeRequest() {
+            const fileInput = document.getElementById('proofFile');
+            const note = document.getElementById('proofNote').value.trim();
+            const file = fileInput.files[0];
+            if (!file) { showToast('Please attach a screenshot first'); return; }
+            if (file.size > 4 * 1024 * 1024) { showToast('That image is too large — try a smaller screenshot'); return; }
+            const submitBtn = document.getElementById('submitReqBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const imageDataUrl = reader.result;
+                try {
+                    await api('/change-requests', { method: 'POST', body: JSON.stringify({ direction: activeDirection,
+                            imageDataUrl, note }) });
+                    await refreshMyChangeRequests();
+                    closeModal();
+                    showToast('Request sent — admin will review it.');
+                    render();
+                } catch (err) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send to admin';
+                    showToast(err.message);
+                }
+            };
+            reader.onerror = () => { showToast('Could not read that file — try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send to admin'; };
+            reader.readAsDataURL(file);
+        }
+
+        function openImageLightbox(url) {
+            const div = document.createElement('div');
+            div.className = 'lightbox-overlay';
+            div.innerHTML = `<img src="${url}" />`;
+            div.addEventListener('click', () => div.remove());
+            document.body.appendChild(div);
+        }
+
+        function showModal(title, body, onConfirm) {
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>${title}</h3>
+              <p>${body}</p>
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmBtn">Confirm</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('confirmBtn').addEventListener('click', onConfirm);
+        }
+
+        function closeModal() { const o = document.getElementById('overlay'); if (o) o.remove(); }
+
+        function showPromptModal(title, placeholder, onSubmit) {
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>${title}</h3>
+              <input type="password" id="promptInput" placeholder="${placeholder}"
+                style="width:100%;padding:12px;font-size:16px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
+                background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);color:var(--text);margin-bottom:16px;font-family:var(--sans);" />
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitBtn">Submit</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            const inp = document.getElementById('promptInput');
+            setTimeout(() => inp.focus(), 50);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('submitBtn').addEventListener('click', submit);
+            inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+            function submit() { const val = inp.value;
+                closeModal();
+                onSubmit(val); }
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2600);
+        }
+
+        // ─── Init ──────────────────────────────────────────────────────────────
+        (function init() {
+            render();
+        })();
+    </script>
 </body>
 </html>
