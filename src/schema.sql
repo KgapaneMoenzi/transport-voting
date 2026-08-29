@@ -59,6 +59,18 @@ CREATE TABLE IF NOT EXISTS vote_history (
   archived_at BIGINT NOT NULL
 );
 
+-- Tracks the last date each scheduled job actually completed, so that if the
+-- server was asleep (e.g. Render free-tier spin-down) at the moment the cron
+-- job was supposed to fire, the very next incoming request can detect the
+-- job is overdue and run it immediately as a catch-up. Single row, id=1.
+-- See resetJob.js's ensureResetsUpToDate().
+CREATE TABLE IF NOT EXISTS reset_state (
+  id                      INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  last_daily_reset_date   TEXT,
+  last_weekly_flush_date  TEXT
+);
+INSERT INTO reset_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
 -- Seed the default slots only if the table is empty
 INSERT INTO slots (id, direction, time, capacity)
 SELECT * FROM (VALUES
