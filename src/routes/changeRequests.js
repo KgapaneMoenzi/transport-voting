@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool } = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { sendAdminChangeRequestEmail } = require('../mailer');
 
 const router = express.Router();
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -29,13 +30,32 @@ router.post('/', requireAuth, async (req, res) => {
     if (myVote.rowCount === 0) {
       return res.status(400).json({ error: 'No active booking to change' });
     }
+    const slotId = myVote.rows[0].slot_id;
     const id = 'req' + Date.now() + Math.floor(Math.random() * 1000);
     await pool.query(
       `INSERT INTO change_requests (id, student_id, direction, slot_id, image_data_url, note, ts, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')`,
-      [id, req.user.studentId, direction, myVote.rows[0].slot_id, imageDataUrl, note || null, Date.now()]
+      [id, req.user.studentId, direction, slotId, imageDataUrl, note || null, Date.now()]
     );
     res.status(201).json({ id, status: 'pending' });
+
+    // Notify admin by email. Fired after responding to the student so a
+    // slow or failing email send never delays or breaks their request —
+    // sendAdminChangeRequestEmail already swallows its own errors.
+    (async () => {
+      try {
+        const slotResult = await pool.query('SELECT time FROM slots WHERE id = $1', [slotId]);
+        await sendAdminChangeRequestEmail({
+          studentId: req.user.studentId,
+          username: req.user.username,
+          direction,
+          slotTime: slotResult.rows[0]?.time || 'unknown',
+          note: note || null,
+        });
+      } catch (err) {
+        console.error('[change-requests] Failed to send admin notification email:', err);
+      }
+    })();
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Could not submit request' });

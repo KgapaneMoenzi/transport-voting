@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { initSchema } = require('./db');
 const { startDailyResetJob, startWeeklyHistoryFlushJob, ensureResetsUpToDate } = require('./resetJob');
+const { startDepartureReminderJob } = require('./departureReminderJob');
 
 const authRoutes = require('./routes/auth');
 const slotsRoutes = require('./routes/slots');
@@ -48,6 +49,7 @@ initSchema()
     app.listen(PORT, () => console.log(`Transport board API listening on port ${PORT}`));
     startDailyResetJob();
     startWeeklyHistoryFlushJob();
+    startDepartureReminderJob();
     // Also run the catch-up check once at boot, so a reset that was missed
     // while the service was asleep gets applied immediately on startup,
     // rather than waiting for the first request to trickle in.

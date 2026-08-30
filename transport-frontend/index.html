@@ -1933,6 +1933,12 @@
         function render(animate, changedIds) {
             if (animate === undefined) animate = true;
             const app = document.getElementById('app');
+            if (view === 'reset-token') { stopPolling();
+                clearClockTick();
+                stopTypewriter();
+                app.innerHTML = renderResetToken();
+                bindResetToken();
+                return; }
             if (view === 'gate') { stopPolling();
                 clearClockTick();
                 stopTypewriter();
@@ -1953,6 +1959,71 @@
         }
 
         // ─── Render functions ────────────────────────────────────────────────
+        // ─── Password reset via emailed link ───────────────────────────────────
+        let pendingResetToken = null;
+        let pendingResetStudentId = '';
+
+        function renderResetToken() {
+            return `
+        <header>
+          <div class="board-id"><span class="live-dot"></span><span class="eyebrow" id="typed-title"></span><span class="cursor cursor-eyebrow" id="cursor-typing"></span></div>
+          <div class="title-wrapper">
+            <h1><span id="typed-heading" data-text="Transport Board"></span><span class="cursor" id="cursor-heading"></span></h1>
+          </div>
+          <div class="sub">Set a new password for #${escapeHtml(pendingResetStudentId)}.</div>
+        </header>
+        <main>
+          <div class="gate">
+            <div class="field-label" style="margin-top:8px;">New Password</div>
+            <input type="password" id="rtPw" placeholder="Choose a new password (min 4 characters)" autocomplete="off">
+            <div class="field-label" style="margin-top:12px;">Confirm New Password</div>
+            <input type="password" id="rtPw2" placeholder="Repeat new password" autocomplete="off">
+            <button class="btn btn-primary" id="rtSubmitBtn">Set New Password</button>
+            <div class="gate-note">This link is single-use and expires 15 minutes after it was requested. If it's expired, go back and request a new one from the login screen.</div>
+          </div>
+        </main>
+        <footer>
+          <div class="dev-credit">Developed by Kgapane Moenzi</div>
+        </footer>
+      `;
+        }
+
+        function bindResetToken() {
+            const pwInp = document.getElementById('rtPw');
+            const pw2Inp = document.getElementById('rtPw2');
+            const btn = document.getElementById('rtSubmitBtn');
+            async function doReset() {
+                const pw = pwInp.value;
+                const pw2 = pw2Inp.value;
+                if (pw.length < 4) { showToast('Password must be at least 4 characters'); return; }
+                if (pw !== pw2) { showToast('Passwords do not match'); return; }
+                btn.disabled = true;
+                btn.textContent = 'Saving…';
+                try {
+                    await api('/auth/reset-password-token', { method: 'POST', body: JSON.stringify({
+                            studentId: pendingResetStudentId,
+                            token: pendingResetToken,
+                            newPassword: pw
+                        }) });
+                    // Clean the token out of the URL so a refresh or shared link
+                    // can't be replayed, then send them to the normal login screen.
+                    window.history.replaceState({}, '', window.location.pathname);
+                    pendingResetToken = null;
+                    pendingResetStudentId = '';
+                    view = 'gate';
+                    gateMode = 'login';
+                    showToast('Password reset — you can log in now.');
+                    render();
+                } catch (err) {
+                    showToast(err.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Set New Password';
+                }
+            }
+            btn.addEventListener('click', doReset);
+            pw2Inp.addEventListener('keydown', e => { if (e.key === 'Enter') doReset(); });
+        }
+
         function renderGate() {
             const mode = gateMode;
             return `
@@ -1975,7 +2046,7 @@
                 maxlength="${STUDENT_ID_MAXLEN}">
               <div class="field-label" style="margin-top:14px;">Password</div>
               <input type="password" id="loginPw" placeholder="Your password" autocomplete="off">
-              <div style="text-align:right; margin-top:6px;"><span id="forgotPwLink" style="color:var(--neon-cyan); font-size:12px; font-weight:600; cursor:pointer; transition:opacity 0.2s; text-shadow:0 0 8px var(--neon-cyan);">Forgot password?</span></div>
+              <div style="text-align:right; margin-top:6px;"><span id="forgotPwLink" style="color:var(--neon-cyan); font-size:12px; font-weight:600; cursor:pointer; transition:opacity 0.2s; text-shadow:0 0 8px var(--neon-cyan);">Forgot password?</span> <span style="color:var(--text-dimmer); font-size:12px;">·</span> <span id="forgotPwEmailLink" style="color:var(--neon-magenta); font-size:12px; font-weight:600; cursor:pointer; text-shadow:0 0 8px var(--neon-magenta);">Reset via email</span></div>
               <button class="btn btn-primary" id="loginBtn">Log In</button>
               <div class="gate-note">No account yet? Tap "Create Account" above — you'll register your student number, a username, and a password.</div>
             ` : `
@@ -1991,6 +2062,8 @@
               <input type="text" id="suSecSchool" placeholder="e.g. Riverside Primary" autocomplete="off">
               <div class="field-label" style="margin-top:10px; text-transform:none; letter-spacing:0; font-size:11px; font-weight:400;">When did you complete matric? (year)</div>
               <input type="text" id="suSecMatric" placeholder="e.g. 2021" autocomplete="off" inputmode="numeric" maxlength="4">
+              <div class="field-label" style="margin-top:16px;">Email <span style="color:var(--text-dimmer); text-transform:none; letter-spacing:0; font-weight:400;">(optional — lets you reset your password by email instead of security questions, and get a reminder before your shuttle leaves)</span></div>
+              <input type="text" id="suEmail" placeholder="e.g. thandi@example.com" autocomplete="off" autocapitalize="off">
               <div class="field-label" style="margin-top:14px;">Password</div>
               <input type="password" id="suPw" placeholder="Choose a password (min 4 characters)" autocomplete="off">
               <div class="field-label" style="margin-top:10px;">Confirm Password</div>
@@ -2310,6 +2383,7 @@
                 const btn = document.getElementById('loginBtn');
                 idInp.addEventListener('input', () => sanitizeStudentIdInput(idInp));
                 document.getElementById('forgotPwLink').addEventListener('click', openForgotPasswordModal);
+                document.getElementById('forgotPwEmailLink').addEventListener('click', openForgotPasswordEmailModal);
 
                 async function doLogin() {
                     const id = idInp.value.trim();
@@ -2339,6 +2413,7 @@
                 const secMotherInp = document.getElementById('suSecMother');
                 const secSchoolInp = document.getElementById('suSecSchool');
                 const secMatricInp = document.getElementById('suSecMatric');
+                const emailInp = document.getElementById('suEmail');
                 const pwInp = document.getElementById('suPw');
                 const pw2Inp = document.getElementById('suPw2');
                 const btn = document.getElementById('signupBtn');
@@ -2350,6 +2425,7 @@
                     const secMother = secMotherInp.value.trim();
                     const secSchool = secSchoolInp.value.trim();
                     const secMatric = secMatricInp.value.trim();
+                    const email = emailInp.value.trim();
                     const pw = pwInp.value;
                     const pw2 = pw2Inp.value;
                     if (!isValidStudentId(id)) { showToast('Enter a valid student number'); return; }
@@ -2365,6 +2441,7 @@
                                 studentId: id,
                                 username: name,
                                 password: pw,
+                                email: email || undefined,
                                 securityMother: secMother,
                                 securitySchool: secSchool,
                                 securityMatric: secMatric
@@ -2566,6 +2643,45 @@
                     view = 'admin';
                     render();
                 } catch (err) { showToast(err.message); }
+            });
+        }
+
+        function openForgotPasswordEmailModal() {
+            const div = document.createElement('div');
+            div.className = 'overlay';
+            div.id = 'overlay';
+            div.innerHTML = `
+            <div class="modal">
+              <h3>Reset via email</h3>
+              <p>Enter your student number. If your account has an email on file, we'll send a reset link to it. The link expires in 15 minutes.</p>
+              <div class="field-label">Student Number</div>
+              <input type="text" id="fpeId" placeholder="e.g. 220456789" autocomplete="off" autocapitalize="off"
+                maxlength="${STUDENT_ID_MAXLEN}" style="margin-bottom:16px;">
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="sendResetLinkBtn" style="margin-top:0;">Send reset link</button>
+              </div>
+            </div>`;
+            document.body.appendChild(div);
+            const idInp = document.getElementById('fpeId');
+            idInp.addEventListener('input', () => sanitizeStudentIdInput(idInp));
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('sendResetLinkBtn').addEventListener('click', async () => {
+                const id = idInp.value.trim();
+                if (!isValidStudentId(id)) { showToast('Enter a valid student number'); return; }
+                const btn = document.getElementById('sendResetLinkBtn');
+                btn.disabled = true;
+                btn.textContent = 'Sending…';
+                try {
+                    const data = await api('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ studentId: id }) });
+                    closeModal();
+                    showToast(data.message || 'If that account has an email on file, a reset link has been sent.');
+                } catch (err) {
+                    showToast(err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Send reset link';
+                }
             });
         }
 
@@ -2796,6 +2912,14 @@
 
         // ─── Init ──────────────────────────────────────────────────────────────
         (function init() {
+            const params = new URLSearchParams(window.location.search);
+            const tokenFromUrl = params.get('resetToken');
+            const studentIdFromUrl = params.get('studentId');
+            if (tokenFromUrl && studentIdFromUrl) {
+                pendingResetToken = tokenFromUrl;
+                pendingResetStudentId = studentIdFromUrl.toUpperCase();
+                view = 'reset-token';
+            }
             render();
         })();
     </script>

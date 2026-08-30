@@ -17,12 +17,31 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS security_mother_hash TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS security_school_hash TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS security_matric_hash TEXT;
 
+-- Optional email, used for email-based password reset and (once a slot is
+-- booked) departure reminders. Nullable — students without an email on
+-- file simply fall back to the security-question reset flow above, and
+-- won't receive departure reminders.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+
+-- Email-based password reset token. We store a hash of the token (never
+-- the raw token) plus an expiry, mirroring how password_hash works.
+-- Cleared out after a successful reset or once expired.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_hash TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires BIGINT;
+
 CREATE TABLE IF NOT EXISTS slots (
   id        TEXT PRIMARY KEY,
   direction TEXT NOT NULL CHECK (direction IN ('to_campus', 'to_residence')),
   time      TEXT NOT NULL,
   capacity  INTEGER NOT NULL DEFAULT 13 CHECK (capacity > 0)
 );
+
+-- Tracks the SAST calendar date ('YYYY-MM-DD') this slot's 5-minutes-before
+-- departure reminder was last sent for. Slot rows are recurring daily
+-- (same id, same time, every day), so this lets the reminder job tell
+-- "already emailed riders for today's 09:00 departure" apart from
+-- tomorrow's. See departureReminderJob.js.
+ALTER TABLE slots ADD COLUMN IF NOT EXISTS reminder_sent_for TEXT;
 
 CREATE TABLE IF NOT EXISTS votes (
   id          SERIAL PRIMARY KEY,
