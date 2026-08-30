@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Must be a sender/domain you've verified in your Resend dashboard.
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Transport Board <onboarding@resend.dev>';
 // Where reset links / admin panel links should point.
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://transport-voting-1.onrender.com';
 // Address admin change-request notifications go to.
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
