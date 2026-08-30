@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { initSchema } = require('./db');
 const { startDailyResetJob, startWeeklyHistoryFlushJob, ensureResetsUpToDate } = require('./resetJob');
-const { startDepartureReminderJob } = require('./departureReminderJob');
+const { startDepartureReminderJob } = require('./departureReminderjob');
 
 const authRoutes = require('./routes/auth');
 const slotsRoutes = require('./routes/slots');
