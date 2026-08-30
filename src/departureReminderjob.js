@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const { pool } = require('./db');
-const { sendDepartureReminderEmail } = require('./Mailer');
+const { sendDepartureReminderEmail } = require('./mailer');
 
 const TZ = 'Africa/Johannesburg';
 // Fire the reminder once departure is this many minutes away or less.
