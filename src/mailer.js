@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Must be a sender/domain you've verified in your Resend dashboard.
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Transport Board <onboarding@resend.dev>';
 // Where reset links / admin panel links should point.
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://transport-voting-1.onrender.com';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://transport-voting-1.onrender.com/';
 // Address admin change-request notifications go to.
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
@@ -18,12 +18,17 @@ const DIRECTION_LABEL = {
 // return) rather than throwing. Email is a side effect, not the point of
 // the request — a booking, a change request, or a signup should never
 // fail just because Resend had a hiccup.
+//
+// Resend's SDK doesn't always throw on failure — it can resolve with
+// { data: null, error: {...} } instead. Each function below checks that
+// `error` field explicitly and logs it, rather than assuming a resolved
+// promise means the email actually sent.
 
 async function sendPasswordResetEmail({ to, studentId, token }) {
   if (!to) return;
   const resetUrl = `${FRONTEND_URL}/?resetToken=${encodeURIComponent(token)}&studentId=${encodeURIComponent(studentId)}`;
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to,
       subject: 'Reset your Transport Board password',
@@ -33,7 +38,11 @@ async function sendPasswordResetEmail({ to, studentId, token }) {
         <p>If you didn't request this, you can safely ignore this email — your password won't change.</p>
       `,
     });
-    console.log(`[mailer] Password reset email sent to ${to}`);
+    if (error) {
+      console.error('[mailer] Resend rejected password reset email:', error);
+      return;
+    }
+    console.log(`[mailer] Password reset email sent to ${to} (id: ${data?.id})`);
   } catch (err) {
     console.error('[mailer] Failed to send password reset email:', err);
   }
@@ -45,7 +54,7 @@ async function sendAdminChangeRequestEmail({ studentId, username, direction, slo
     return;
   }
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       subject: `New change request from ${username} (#${studentId})`,
@@ -56,7 +65,11 @@ async function sendAdminChangeRequestEmail({ studentId, username, direction, slo
         <p><a href="${FRONTEND_URL}">Open the admin panel to review</a>.</p>
       `,
     });
-    console.log(`[mailer] Admin change-request notification sent for ${studentId}`);
+    if (error) {
+      console.error('[mailer] Resend rejected admin change-request email:', error);
+      return;
+    }
+    console.log(`[mailer] Admin change-request notification sent for ${studentId} (id: ${data?.id})`);
   } catch (err) {
     console.error('[mailer] Failed to send admin change-request email:', err);
   }
@@ -65,7 +78,7 @@ async function sendAdminChangeRequestEmail({ studentId, username, direction, slo
 async function sendDepartureReminderEmail({ to, username, time, direction }) {
   if (!to) return;
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to,
       subject: `Your ${time} shuttle leaves in 5 minutes`,
@@ -75,7 +88,11 @@ async function sendDepartureReminderEmail({ to, username, time, direction }) {
         leaves in about 5 minutes — head down now.</p>
       `,
     });
-    console.log(`[mailer] Departure reminder sent to ${to} for slot ${time}`);
+    if (error) {
+      console.error('[mailer] Resend rejected departure reminder email:', error);
+      return;
+    }
+    console.log(`[mailer] Departure reminder sent to ${to} for slot ${time} (id: ${data?.id})`);
   } catch (err) {
     console.error('[mailer] Failed to send departure reminder email:', err);
   }
